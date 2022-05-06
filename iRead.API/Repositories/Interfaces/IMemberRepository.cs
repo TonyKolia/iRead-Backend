@@ -20,7 +20,7 @@ namespace iRead.API.Repositories.Interfaces
 
         #endregion
 
-        Task<MemberFullInfo> GetMemberFullInfo(int id);
+        Task<MemberResponse> GetMemberFullInfo(int id);
 
     }
 }

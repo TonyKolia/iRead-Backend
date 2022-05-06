@@ -2,6 +2,7 @@
 using iRead.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using iRead.API.Utilities;
 
 namespace iRead.API.Controllers
 {
@@ -10,18 +11,19 @@ namespace iRead.API.Controllers
     public class MemberController : CustomControllerBase
     {
         private readonly IMemberRepository _memberRepository;
+        private readonly IUserRepository _userRepository;
 
-        public MemberController(IMemberRepository _memberRepository, ILogger<CustomControllerBase> logger) : base(logger)
+        public MemberController(IUserRepository _userRepository, IMemberRepository _memberRepository, ILogger<CustomControllerBase> logger) : base(logger)
         {
             this._memberRepository = _memberRepository;
+            this._userRepository = _userRepository;
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<MemberFullInfo>> GetFullInfo(int id)
+        public async Task<ActionResult<MemberResponse>> GetFullInfo(int id)
         {
-            var memberFullInfo = await _memberRepository.GetMemberFullInfo(id);
-            return memberFullInfo != null ? Ok(memberFullInfo) : NotFound($"User with id {id} not found.");
+            return await _userRepository.UserExists(id) ? Ok(await _memberRepository.GetMemberFullInfo(id)) : NotFound($"User with id {id} not found.");
         }
 
 
@@ -31,7 +33,7 @@ namespace iRead.API.Controllers
         [Route("Personal/{id}")]
         public async Task<ActionResult<MemberPersonalInfo>> GetPersonalInfo(int id)
         {
-            return Ok(await _memberRepository.GetMemberPersonalInfo(id));
+            return Ok((await _memberRepository.GetMemberPersonalInfo(id)).MapResponse());
         }
 
         [HttpPost]
@@ -40,7 +42,7 @@ namespace iRead.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, await _memberRepository.CreateMemberPersonalInfo(personalInfo));
+                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.CreateMemberPersonalInfo(personalInfo)).MapResponse());
             }
             catch(Exception ex)
             {
@@ -55,7 +57,7 @@ namespace iRead.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, await _memberRepository.UpdateMemberPersonalInfo(personalInfo));
+                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.UpdateMemberPersonalInfo(personalInfo)).MapResponse());
             }
             catch (Exception ex)
             {
@@ -72,7 +74,7 @@ namespace iRead.API.Controllers
         [Route("Contact/{id}")]
         public async Task<ActionResult<MemberContactInfo>> GetContactInfo(int id)
         {
-            return Ok(await _memberRepository.GetMemberContactInfo(id));
+            return Ok((await _memberRepository.GetMemberContactInfo(id)).MapResponse());
         }
 
         [HttpPost]
@@ -81,7 +83,7 @@ namespace iRead.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, await _memberRepository.CreateMemberContactInfo(contactInfo));
+                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.CreateMemberContactInfo(contactInfo)).MapResponse());
             }
             catch (Exception ex)
             {
@@ -96,7 +98,7 @@ namespace iRead.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, await _memberRepository.UpdateMemberContactInfo(contactInfo));
+                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.UpdateMemberContactInfo(contactInfo)).MapResponse());
             }
             catch (Exception ex)
             {

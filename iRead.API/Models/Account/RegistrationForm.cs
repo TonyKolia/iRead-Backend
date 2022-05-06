@@ -12,6 +12,7 @@
         public DateTime? Birthdate { get; set; }
         public int? Gender { get; set; }
         public int? IdType { get; set; }
+        public string IdNumber { get; set; }
 
 
         //contact info

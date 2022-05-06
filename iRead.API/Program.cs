@@ -19,6 +19,7 @@ builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserCategoryRepository, UserCategoryRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped<IEncryptionUtilities, EncryptionUtilities>();
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();

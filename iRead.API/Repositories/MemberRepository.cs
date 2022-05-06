@@ -72,16 +72,37 @@ namespace iRead.API.Repositories
 
         #endregion
 
-        public async Task<MemberFullInfo> GetMemberFullInfo(int id)
+        public async Task<MemberResponse> GetMemberFullInfo(int id)
         {
-            var userData = await _db.Users.Where(x => x.Id == id).Select(x => new { x.Username, x.RegisterDate }).FirstOrDefaultAsync();
-            var memberPersonalInfo = await _db.MemberPersonalInfos.FirstOrDefaultAsync(x => x.UserId == id);
-            var memberContactInfo = await _db.MemberContactInfos.FirstOrDefaultAsync(x => x.UserId == id);
+            var userData = await (from user in _db.Users
+                            join pers in _db.MemberPersonalInfos on user.Id equals pers.UserId
+                            join cont in _db.MemberContactInfos on user.Id equals cont.UserId
+                            where user.Id == id
+                            select new MemberResponse
+                            {
+                                Id = user.Id,
+                                Username = user.Username,
+                                RegisterDate = user.RegisterDate,
+                                UserCategory = user.UserCategoryNavigation.Description ?? "",
+                                PersonalInfo = new MemberPersonalInfoResponse
+                                {
+                                    Name = pers.Name,
+                                    Surname = pers.Surname,
+                                    Birthdate = pers.Birthdate,
+                                    IdType = pers.IdTypeNavigation.Description ?? "",
+                                    IdNumber = pers.IdNumber
+                                },
+                                ContactInfo = new MemberContactInfoResponse
+                                {
+                                    Address = cont.Address,
+                                    City = cont.City,
+                                    PostalCode = cont.PostalCode,
+                                    Telephone = cont.Telephone,
+                                    Email = cont.Email
+                                }
+                            }).FirstOrDefaultAsync();
 
-            if (userData != null && (memberContactInfo != null || memberContactInfo != null))
-                return new MemberFullInfo { Username = userData.Username, RegisterDate = userData.RegisterDate, ContactInfo = memberContactInfo, PersonalInfo = memberPersonalInfo };
-            else
-                return null;
+            return userData;
         }
     }
 }

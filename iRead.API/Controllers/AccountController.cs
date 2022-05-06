@@ -1,4 +1,5 @@
-﻿using iRead.API.Models.Account;
+﻿using iRead.API.Models;
+using iRead.API.Models.Account;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -25,55 +26,53 @@ namespace iRead.API.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public async Task<ActionResult> Register([FromBody] RegistrationForm form)
+        public async Task<ActionResult<MemberFullInfo>> Register([FromBody] RegistrationForm data)
         {
             try
             {
-                if (form == null || !_validationUtilities.IsObjectCompletelyPopulated(form))
+                if (data == null || !_validationUtilities.IsObjectCompletelyPopulated(data))
                     return BadRequest("Not all fields have been filled in.");
 
-                if(await _userRepository.UserExists(form.Username))
-                    return BadRequest($"User with username {form.Username} already exists");
+                if(await _userRepository.UserExists(data.Username))
+                    return BadRequest($"User with username {data.Username} already exists");
 
-                var validationResult = _validationUtilities.ValidateRegistrationForm(form);
+                var validationResult = _validationUtilities.ValidateRegistrationForm(data);
 
                 if (!validationResult.Success)
                     return BadRequest(validationResult.Messages);
 
                 var accountData = new User
                 {
-                    Id = 0,
-                    Username = form.Username,
-                    Password = _encryptionUtilities.EncryptPassword(form.Password),
+                    Username = data.Username,
+                    Password = _encryptionUtilities.EncryptPassword(data.Password),
                     RegisterDate = DateTime.Now,
+                    LastLogin = DateTime.Now,
                     UserCategory = 1,
                     Active = 1
                 };
 
                 var createdUser = await _userRepository.CreateUser(accountData);
 
-                var personalData = new MemberPersonalInfo 
+                accountData.MemberContactInfo = new MemberContactInfo
                 {
-                    UserId = createdUser.Id,
-                    Name = form.Name,
-                    Surname = form.Surname,
-                    Birthdate = form.Birthdate.Value,
-                    Gender = form.Gender.Value,
-                    IdType = form.IdType.Value
+                    Address = data.Address,
+                    City = data.City,
+                    PostalCode = data.PostalCode,
+                    Telephone = data.Telephone,
+                    Email = data.Email
+                }; 
+
+                accountData.MemberPersonalInfo = new MemberPersonalInfo
+                {
+                    Name = data.Name,
+                    Surname = data.Surname,
+                    Birthdate = data.Birthdate.Value,
+                    Gender = data.Gender.Value,
+                    IdType = data.IdType.Value,
+                    IdNumber = data.IdNumber
                 };
 
-                var contactData = new MemberContactInfo 
-                {
-                    UserId = createdUser.Id,
-                    Address = form.Address,
-                    City = form.City,
-                    PostalCode = form.PostalCode,
-                    Telephone = form.Telephone,
-                    Email = form.Email
-                };
-
-                await _memberRepository.CreateMemberPersonalInfo(personalData);
-                await _memberRepository.CreateMemberContactInfo(contactData);
+                await _userRepository.UpdateUser(accountData);
 
                 return StatusCode(StatusCodes.Status201Created, await _memberRepository.GetMemberFullInfo(createdUser.Id));
             }
@@ -82,7 +81,6 @@ namespace iRead.API.Controllers
                 _logger.LogError(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured.");
             }
-
         }
 
         [HttpPost]
