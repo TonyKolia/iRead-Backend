@@ -9,7 +9,7 @@ namespace iRead.DBModels.Models
         public string IdNumber { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
-        public DateTime Birthdate { get; set; }
+        public DateTime? Birthdate { get; set; }
         public int Gender { get; set; }
         public int IdType { get; set; }
 

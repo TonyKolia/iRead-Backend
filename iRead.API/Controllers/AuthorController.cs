@@ -1,4 +1,5 @@
 ﻿using iRead.API.Repositories;
+using iRead.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +19,16 @@ namespace iRead.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Author>>> Get()
         {
-            return Ok(await _authorRepository.GetAuthors());
+            var authors = await _authorRepository.GetAuthors();
+            return authors.Count() > 0 ? Ok(authors.MapResponse()) : NotFound("No authors found.");
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<Author>> Get(int id)
         {
-            return Ok(await _authorRepository.GetAuthor(id));
+            var author = await _authorRepository.GetAuthor(id);
+            return author != null ? Ok(author.MapResponse()) : NotFound($"Author with id {id} not found");
         }
     }
 }

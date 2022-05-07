@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using iRead.DBModels.Models;
 using iRead.API.Repositories;
+using iRead.API.Utilities;
 
 namespace iRead.API.Controllers
 {
@@ -19,14 +20,16 @@ namespace iRead.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Gender>>> Get()
         {
-            return Ok(await _genderRepository.GetGenders());
+            var genders = await _genderRepository.GetGenders();
+            return genders.Count() > 0 ? Ok(genders.MapResponse()) : NotFound("No genders found.");
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<Gender>> Get(int id)
         {
-            return Ok(await _genderRepository.GetGender(id));
+            var gender = await _genderRepository.GetGender(id);
+            return gender != null ? Ok(gender.MapResponse()) : NotFound($"Gender with id {id} not found.");
         }
     }
 }

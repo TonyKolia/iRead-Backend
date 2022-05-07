@@ -1,4 +1,5 @@
 ﻿using iRead.API.Repositories.Interfaces;
+using iRead.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +19,16 @@ namespace iRead.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
-            return Ok(await _categoryRepository.GetCategories());
+            var categories = await _categoryRepository.GetCategories();
+            return categories.Count() > 0 ? Ok(categories.MapResponse()) : NotFound("No categories found.");
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<Category>> Get(int id)
         {
-            return Ok(await _categoryRepository.GetCategory(id));
+            var category = await _categoryRepository.GetCategory(id);
+            return category != null ? Ok(category.MapResponse()) : NotFound($"Category with id {id} not found.");
         }
     }
 }

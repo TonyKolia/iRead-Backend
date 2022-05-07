@@ -1,4 +1,6 @@
-﻿using iRead.API.Repositories;
+﻿using iRead.API.Models;
+using iRead.API.Repositories;
+using iRead.API.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace iRead.API.Controllers
@@ -15,16 +17,18 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<IdentificationMethod>>> Get()
+        public async Task<ActionResult<IEnumerable<IdentificationMethodResponse>>> Get()
         {
-            return Ok(await _identificationRepository.GetIdentificationMethods());
+            var identifications = await _identificationRepository.GetIdentificationMethods();
+            return identifications.Count() > 0 ?  Ok(identifications.MapResponse()) : NotFound($"No identification methods found.");
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Gender>> Get(int id)
+        public async Task<ActionResult<IdentificationMethodResponse>> Get(int id)
         {
-            return Ok(await _identificationRepository.GetIdentificationMethod(id));
+            var identificationMethod = await _identificationRepository.GetIdentificationMethod(id);
+            return ReturnIfNotEmpty(identificationMethod, $"Identification method with id {id} not found.");
         }
     }
 }

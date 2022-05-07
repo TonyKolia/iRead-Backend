@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using iRead.API.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace iRead.API.Controllers
 {
@@ -9,6 +10,11 @@ namespace iRead.API.Controllers
         public CustomControllerBase(ILogger<CustomControllerBase> logger)
         {
             _logger = logger;
+        }
+
+        protected ActionResult ReturnIfNotEmpty<T> (T data, string notFoundMessage = "")
+        {
+            return data != null ? Ok(data.MapResponse()) : NotFound(notFoundMessage);
         }
     }
 }

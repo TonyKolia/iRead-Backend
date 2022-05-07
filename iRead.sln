@@ -5,7 +5,12 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRead.DBModels", "iRead.DBModels\iRead.DBModels.csproj", "{E722D525-2FDA-4CB9-A1DB-330033E644AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRead.API", "iRead.API\iRead.API.csproj", "{DA2A73F9-C5D9-4FFD-8F8C-DD4C57F4B27D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRead.API", "iRead.API\iRead.API.csproj", "{DA2A73F9-C5D9-4FFD-8F8C-DD4C57F4B27D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DE7676A8-8AE6-4AD5-9CE0-68BB0C6DE378}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

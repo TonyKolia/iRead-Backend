@@ -28,9 +28,11 @@
         public int PageCount { get; set; }
         public string Description { get; set; }
         public string ImagePath { get; set; }
-
+        public decimal Rating { get; set; } = 0;
+        public int TotalRatings { get; set; }
         public IEnumerable<AuthorResponse> Authors { get; set; }
         public IEnumerable<CategoryResponse> Categories { get; set; }
+        public IEnumerable<RatingResponse> Ratings { get; set; }
     }
 
     public class AuthorResponse
@@ -76,5 +78,30 @@
 
     }
 
+    public class RatingResponse
+    {
+        public int Rating { get; set; }
+        public string Comment { get; set; }
+    }
+
+    public class PublisherResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class GenderResponse
+    {
+        public int Id { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class IdentificationMethodResponse
+    {
+        public int Id { get; set; }
+        public string Description { get; set; }
+    }
+    
 
 }

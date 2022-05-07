@@ -20,12 +20,15 @@ namespace iRead.DBModels.Models
         public virtual DbSet<Book> Books { get; set; } = null!;
         public virtual DbSet<BooksStock> BooksStocks { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<Favorite> Favorites { get; set; } = null!;
         public virtual DbSet<Gender> Genders { get; set; } = null!;
         public virtual DbSet<IdentificationMethod> IdentificationMethods { get; set; } = null!;
         public virtual DbSet<MemberContactInfo> MemberContactInfos { get; set; } = null!;
         public virtual DbSet<MemberPersonalInfo> MemberPersonalInfos { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderStatus> OrderStatuses { get; set; } = null!;
+        public virtual DbSet<Publisher> Publishers { get; set; } = null!;
+        public virtual DbSet<Rating> Ratings { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserCategory> UserCategories { get; set; } = null!;
 
@@ -86,6 +89,19 @@ namespace iRead.DBModels.Models
 
                             j.ToTable("BooksCategories");
                         });
+
+                entity.HasMany(d => d.Publishers)
+                    .WithMany(p => p.Books)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "BooksPublisher",
+                        l => l.HasOne<Publisher>().WithMany().HasForeignKey("PublisherId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__BooksPubl__Publi__72C60C4A"),
+                        r => r.HasOne<Book>().WithMany().HasForeignKey("BookId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__BooksPubl__BookI__71D1E811"),
+                        j =>
+                        {
+                            j.HasKey("BookId", "PublisherId").HasName("PK__BooksPub__992695FD2B24A1FA");
+
+                            j.ToTable("BooksPublishers");
+                        });
             });
 
             modelBuilder.Entity<BooksStock>(entity =>
@@ -109,6 +125,24 @@ namespace iRead.DBModels.Models
                 entity.Property(e => e.Description)
                     .HasMaxLength(255)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Favorite>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.BookId })
+                    .HasName("PK__Favorite__7456C06C5CDC01EE");
+
+                entity.HasOne(d => d.Book)
+                    .WithMany(p => p.Favorites)
+                    .HasForeignKey(d => d.BookId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Favorites__BookI__7A672E12");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Favorites)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Favorites__UserI__797309D9");
             });
 
             modelBuilder.Entity<Gender>(entity =>
@@ -172,8 +206,6 @@ namespace iRead.DBModels.Models
                     .IsUnique();
 
                 entity.Property(e => e.UserId).ValueGeneratedNever();
-
-                entity.Property(e => e.Birthdate).HasColumnType("datetime");
 
                 entity.Property(e => e.IdNumber)
                     .HasMaxLength(50)
@@ -241,6 +273,37 @@ namespace iRead.DBModels.Models
                 entity.Property(e => e.Description)
                     .HasMaxLength(255)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Publisher>(entity =>
+            {
+                entity.Property(e => e.Description).HasColumnType("text");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Rating>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.BookId })
+                    .HasName("PK__Ratings__7456C06C0FCC6B5A");
+
+                entity.Property(e => e.Comment).HasColumnType("text");
+
+                entity.Property(e => e.Rating1).HasColumnName("Rating");
+
+                entity.HasOne(d => d.Book)
+                    .WithMany(p => p.Ratings)
+                    .HasForeignKey(d => d.BookId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Ratings__BookId__76969D2E");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Ratings)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Ratings__UserId__75A278F5");
             });
 
             modelBuilder.Entity<User>(entity =>

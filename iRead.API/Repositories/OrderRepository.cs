@@ -59,6 +59,11 @@ namespace iRead.API.Repositories
                     {
                         Id = c.Id,
                         Description = c.Description ?? ""
+                    }),
+                    Ratings = b.Ratings.Select(r => new RatingResponse 
+                    {
+                        Rating = r.Rating1,
+                        Comment = r.Comment ?? ""
                     })
                 })
             }).FirstOrDefaultAsync(x => x.Id == id);
@@ -95,6 +100,11 @@ namespace iRead.API.Repositories
                     {
                         Id = c.Id,
                         Description = c.Description ?? ""
+                    }),
+                    Ratings = b.Ratings.Select(r => new RatingResponse
+                    {
+                        Rating = r.Rating1,
+                        Comment = r.Comment ?? ""
                     })
                 })
             }).ToListAsync();

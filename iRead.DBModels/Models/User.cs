@@ -7,7 +7,9 @@ namespace iRead.DBModels.Models
     {
         public User()
         {
+            Favorites = new HashSet<Favorite>();
             Orders = new HashSet<Order>();
+            Ratings = new HashSet<Rating>();
         }
 
         public int Id { get; set; }
@@ -21,6 +23,8 @@ namespace iRead.DBModels.Models
         public virtual UserCategory? UserCategoryNavigation { get; set; }
         public virtual MemberContactInfo MemberContactInfo { get; set; } = null!;
         public virtual MemberPersonalInfo MemberPersonalInfo { get; set; } = null!;
+        public virtual ICollection<Favorite> Favorites { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

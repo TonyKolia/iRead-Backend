@@ -88,7 +88,7 @@ namespace iRead.API.Repositories
                                 {
                                     Name = pers.Name,
                                     Surname = pers.Surname,
-                                    Birthdate = pers.Birthdate,
+                                    Birthdate = pers.Birthdate.Value,
                                     IdType = pers.IdTypeNavigation.Description ?? "",
                                     IdNumber = pers.IdNumber
                                 },

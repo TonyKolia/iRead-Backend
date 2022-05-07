@@ -31,18 +31,20 @@ namespace iRead.API.Controllers
 
         [HttpGet]
         [Route("Personal/{id}")]
-        public async Task<ActionResult<MemberPersonalInfo>> GetPersonalInfo(int id)
+        public async Task<ActionResult<MemberPersonalInfoResponse>> GetPersonalInfo(int id)
         {
-            return Ok((await _memberRepository.GetMemberPersonalInfo(id)).MapResponse());
+            var personalInfo = await _memberRepository.GetMemberPersonalInfo(id);
+            return personalInfo != null ? Ok(personalInfo.MapResponse()) : NotFound($"Personal information for member with id {id} not found.");
         }
 
         [HttpPost]
         [Route("Personal")]
-        public async Task<ActionResult<MemberPersonalInfo>> CreatePersonalInfo(MemberPersonalInfo personalInfo)
+        public async Task<ActionResult<MemberPersonalInfoResponse>> CreatePersonalInfo(MemberPersonalInfo personalInfo)
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.CreateMemberPersonalInfo(personalInfo)).MapResponse());
+                var createdPersonalInfo = await _memberRepository.CreateMemberPersonalInfo(personalInfo);
+                return StatusCode(StatusCodes.Status201Created, createdPersonalInfo.MapResponse());
             }
             catch(Exception ex)
             {
@@ -53,11 +55,12 @@ namespace iRead.API.Controllers
 
         [HttpPut]
         [Route("Personal")]
-        public async Task<ActionResult<MemberPersonalInfo>> UpdatePersonalInfo(MemberPersonalInfo personalInfo)
+        public async Task<ActionResult<MemberPersonalInfoResponse>> UpdatePersonalInfo(MemberPersonalInfo personalInfo)
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.UpdateMemberPersonalInfo(personalInfo)).MapResponse());
+                var updatedPersonalInfo = await _memberRepository.UpdateMemberPersonalInfo(personalInfo);
+                return Ok(updatedPersonalInfo.MapResponse());
             }
             catch (Exception ex)
             {
@@ -72,18 +75,20 @@ namespace iRead.API.Controllers
 
         [HttpGet]
         [Route("Contact/{id}")]
-        public async Task<ActionResult<MemberContactInfo>> GetContactInfo(int id)
+        public async Task<ActionResult<MemberContactInfoResponse>> GetContactInfo(int id)
         {
-            return Ok((await _memberRepository.GetMemberContactInfo(id)).MapResponse());
+            var contactInfo = await _memberRepository.GetMemberContactInfo(id);
+            return contactInfo != null ? Ok((contactInfo).MapResponse()) : NotFound($"Contact information for member with id {id} not found.");
         }
 
         [HttpPost]
         [Route("Contact")]
-        public async Task<ActionResult<MemberContactInfo>> CreateContactInfo(MemberContactInfo contactInfo)
+        public async Task<ActionResult<MemberContactInfoResponse>> CreateContactInfo(MemberContactInfo contactInfo)
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.CreateMemberContactInfo(contactInfo)).MapResponse());
+                var createdContactInfo = await _memberRepository.CreateMemberContactInfo(contactInfo);
+                return StatusCode(StatusCodes.Status201Created, createdContactInfo.MapResponse());
             }
             catch (Exception ex)
             {
@@ -94,11 +99,12 @@ namespace iRead.API.Controllers
 
         [HttpPut]
         [Route("Contact")]
-        public async Task<ActionResult<MemberContactInfo>> UpdateContactInfo(MemberContactInfo contactInfo)
+        public async Task<ActionResult<MemberContactInfoResponse>> UpdateContactInfo(MemberContactInfo contactInfo)
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, (await _memberRepository.UpdateMemberContactInfo(contactInfo)).MapResponse());
+                var updatedContactInfo = await _memberRepository.UpdateMemberContactInfo(contactInfo);
+                return Ok(updatedContactInfo.MapResponse());
             }
             catch (Exception ex)
             {

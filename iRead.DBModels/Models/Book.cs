@@ -7,9 +7,12 @@ namespace iRead.DBModels.Models
     {
         public Book()
         {
+            Favorites = new HashSet<Favorite>();
+            Ratings = new HashSet<Rating>();
             Authors = new HashSet<Author>();
             Categories = new HashSet<Category>();
             Orders = new HashSet<Order>();
+            Publishers = new HashSet<Publisher>();
         }
 
         public int Id { get; set; }
@@ -20,9 +23,12 @@ namespace iRead.DBModels.Models
         public string? ImagePath { get; set; }
 
         public virtual BooksStock BooksStock { get; set; } = null!;
+        public virtual ICollection<Favorite> Favorites { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
 
         public virtual ICollection<Author> Authors { get; set; }
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Publisher> Publishers { get; set; }
     }
 }
