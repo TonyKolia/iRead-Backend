@@ -22,6 +22,8 @@ builder.Services.AddScoped<IUserCategoryRepository, UserCategoryRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
 
 builder.Services.AddScoped<IEncryptionUtilities, EncryptionUtilities>();
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();

@@ -8,11 +8,11 @@ namespace iRead.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : CustomControllerBase
     {
         private readonly IOrderRepository _orderRepository;
 
-        public OrderController(IOrderRepository _orderRepository)
+        public OrderController(IOrderRepository _orderRepository, ILogger<CustomControllerBase> logger) : base(logger)
         {
             this._orderRepository = _orderRepository;
         }
@@ -23,12 +23,13 @@ namespace iRead.API.Controllers
             try
             {
                 //validate order and stock
-                return Ok(await _orderRepository.CreateOrder(order));
+                var createdOrder = await _orderRepository.CreateOrder(order);
+                return ReturnResponse(ResponseType.Created, "Created successfully", createdOrder);
             }
             catch(Exception ex)
             {
-                //log
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured.");
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
             }
 
         }
@@ -37,14 +38,16 @@ namespace iRead.API.Controllers
         [Route("{id}")]
         public async Task<ActionResult<OrderResponse>> Get(int id)
         {
-            return Ok(await _orderRepository.GetOrder(id));
+            var order = await _orderRepository.GetOrder(id);
+            return ReturnIfNotEmpty(order, $"Order with id {id} not found.");
         }
 
         [HttpGet]
         [Route("user/{userId}")]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetByUser(int userId)
         {
-            return Ok(await _orderRepository.GetUserOrders(userId));
+            var orders = await _orderRepository.GetUserOrders(userId);
+            return ReturnIfNotEmpty(orders, $"No orders found for user with id {userId}.", false);
         }
     }
 }

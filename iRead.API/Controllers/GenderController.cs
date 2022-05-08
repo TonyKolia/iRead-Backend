@@ -21,7 +21,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<IEnumerable<Gender>>> Get()
         {
             var genders = await _genderRepository.GetGenders();
-            return genders.Count() > 0 ? Ok(genders.MapResponse()) : NotFound("No genders found.");
+            return ReturnIfNotEmpty(genders, "No genders found.");
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<Gender>> Get(int id)
         {
             var gender = await _genderRepository.GetGender(id);
-            return gender != null ? Ok(gender.MapResponse()) : NotFound($"Gender with id {id} not found.");
+            return ReturnIfNotEmpty(gender, $"Gender with id {id} not found.");
         }
     }
 }

@@ -1,12 +1,21 @@
 ﻿namespace iRead.API.Models
 {
-    public class Response<T>
+    public class Response
     {
-        public IEnumerable<T> Results { get; set; }
+        public object Data { get; set; }
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
 
-        public Response(IEnumerable<T> results = null)
+        public Response(object Data, string Message, int StatusCode)
         {
-            Results = results ?? Array.Empty<T>();
+            this.Data = Data;
+            this.Message = Message;
+            this.StatusCode = StatusCode;
+        }
+
+        public Response()
+        {
+
         }
     }
 
@@ -80,8 +89,10 @@
 
     public class RatingResponse
     {
+        public string Username { get; set; }
         public int Rating { get; set; }
         public string Comment { get; set; }
+        public DateTime DateAdded { get; set; }
     }
 
     public class PublisherResponse

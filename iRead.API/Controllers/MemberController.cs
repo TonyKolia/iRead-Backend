@@ -34,7 +34,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<MemberPersonalInfoResponse>> GetPersonalInfo(int id)
         {
             var personalInfo = await _memberRepository.GetMemberPersonalInfo(id);
-            return personalInfo != null ? Ok(personalInfo.MapResponse()) : NotFound($"Personal information for member with id {id} not found.");
+            return ReturnIfNotEmpty(personalInfo, $"Personal information for member with id {id} not found.");
         }
 
         [HttpPost]
@@ -78,7 +78,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<MemberContactInfoResponse>> GetContactInfo(int id)
         {
             var contactInfo = await _memberRepository.GetMemberContactInfo(id);
-            return contactInfo != null ? Ok((contactInfo).MapResponse()) : NotFound($"Contact information for member with id {id} not found.");
+            return ReturnIfNotEmpty(contactInfo, $"Contact information for member with id {id} not found.");
         }
 
         [HttpPost]

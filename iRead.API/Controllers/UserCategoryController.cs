@@ -18,14 +18,16 @@ namespace iRead.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserCategory>>> Get()
         {
-            return Ok(await _userCategoryRepository.GetUserCategories());
+            var userCategories = await _userCategoryRepository.GetUserCategories();
+            return ReturnIfNotEmpty(userCategories, "No user categories found.");
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<UserCategory>> Get(int id)
         {
-            return Ok(await _userCategoryRepository.GetUserCategory(id));
+            var userCategory = await _userCategoryRepository.GetUserCategory(id);
+            return ReturnIfNotEmpty(userCategory, $"User category with id {id} not found.");
         }
     }
 }

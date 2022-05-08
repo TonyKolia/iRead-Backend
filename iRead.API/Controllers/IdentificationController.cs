@@ -20,7 +20,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<IEnumerable<IdentificationMethodResponse>>> Get()
         {
             var identifications = await _identificationRepository.GetIdentificationMethods();
-            return identifications.Count() > 0 ?  Ok(identifications.MapResponse()) : NotFound($"No identification methods found.");
+            return ReturnIfNotEmpty(identifications, "No identification methods found.");
         }
 
         [HttpGet]

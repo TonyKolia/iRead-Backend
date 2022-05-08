@@ -26,7 +26,7 @@ namespace iRead.API.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public async Task<ActionResult<MemberFullInfo>> Register([FromBody] RegistrationForm data)
+        public async Task<ActionResult<MemberResponse>> Register([FromBody] RegistrationForm data)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace iRead.API.Controllers
                     return BadRequest("Not all fields have been filled in.");
 
                 if(await _userRepository.UserExists(data.Username))
-                    return BadRequest($"User with username {data.Username} already exists");
+                    return BadRequest($"User with username {data.Username} already exists.");
 
                 var validationResult = _validationUtilities.ValidateRegistrationForm(data);
 

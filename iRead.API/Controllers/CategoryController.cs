@@ -20,7 +20,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
             var categories = await _categoryRepository.GetCategories();
-            return categories.Count() > 0 ? Ok(categories.MapResponse()) : NotFound("No categories found.");
+            return ReturnIfNotEmpty(categories, "No categories found.");
         }
 
         [HttpGet]
@@ -28,7 +28,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<Category>> Get(int id)
         {
             var category = await _categoryRepository.GetCategory(id);
-            return category != null ? Ok(category.MapResponse()) : NotFound($"Category with id {id} not found.");
+            return ReturnIfNotEmpty(category, $"Category with id {id} not found.");
         }
     }
 }

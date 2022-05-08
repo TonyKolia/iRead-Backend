@@ -9,6 +9,7 @@ namespace iRead.DBModels.Models
         public int BookId { get; set; }
         public int Rating1 { get; set; }
         public string? Comment { get; set; }
+        public DateTime DateAdded { get; set; }
 
         public virtual Book Book { get; set; } = null!;
         public virtual User User { get; set; } = null!;

@@ -21,7 +21,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<IEnumerable<PublisherResponse>>> Get()
         {
             var publishers = await _publisherRepository.GetPublishers();
-            return publishers.Count() > 0 ? Ok(publishers.MapResponse()) : NotFound("No publishers found.");
+            return ReturnIfNotEmpty(publishers, "No publishers found.");
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace iRead.API.Controllers
         public async Task<ActionResult<PublisherResponse>> Get(int id)
         {
             var publisher = await _publisherRepository.GetPublisher(id);
-            return publisher != null ? Ok(publisher.MapResponse()) : NotFound($"Publisher with id {id} not found.");
+            return ReturnIfNotEmpty(publisher, $"Publisher with id {id} not found.");
         }
 
 
