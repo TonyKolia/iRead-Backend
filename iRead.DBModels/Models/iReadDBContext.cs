@@ -31,6 +31,7 @@ namespace iRead.DBModels.Models
         public virtual DbSet<Rating> Ratings { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserCategory> UserCategories { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Author>(entity =>
@@ -309,11 +310,11 @@ namespace iRead.DBModels.Models
             {
                 entity.Property(e => e.LastLogin).HasColumnType("datetime");
 
-                entity.Property(e => e.Password)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Password).IsUnicode(false);
 
                 entity.Property(e => e.RegisterDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Salt).IsUnicode(false);
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(255)

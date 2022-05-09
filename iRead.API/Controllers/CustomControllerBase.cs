@@ -16,25 +16,29 @@ namespace iRead.API.Controllers
         protected ActionResult ReturnResponse(ResponseType type, string message = "", object returnData = null)
         {
             Response response = null;
+            var success = type == ResponseType.Created || type == ResponseType.Data || type == ResponseType.Updated || type == ResponseType.Token;
+
             switch (type) 
             {
                 case ResponseType.Error:
-                    response = new Response(returnData, ReturnMessages.DefaultErrorMessage, StatusCodes.Status500InternalServerError);
+                    response = new Response(returnData, ReturnMessages.DefaultErrorMessage, StatusCodes.Status500InternalServerError, success);
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                     break;
                 case ResponseType.BadRequest:
-                    response = new Response(returnData, message, StatusCodes.Status400BadRequest);
+                    response = new Response(returnData, message, StatusCodes.Status400BadRequest, success);
                     return StatusCode(StatusCodes.Status400BadRequest, response);
                     break;
                 case ResponseType.Created:
-                    response = new Response(returnData, ReturnMessages.DefaultCreatedMessage, StatusCodes.Status201Created);
+                    response = new Response(returnData, ReturnMessages.DefaultCreatedMessage, StatusCodes.Status201Created, success);
                     return StatusCode(StatusCodes.Status201Created, response);
                 case ResponseType.Data:
-                    response = new Response(returnData, message, StatusCodes.Status200OK);
+                case ResponseType.Updated:
+                case ResponseType.Token:
+                    response = new Response(returnData, message, StatusCodes.Status200OK, success);
                     return StatusCode(StatusCodes.Status200OK, response);
                     break;
                 case ResponseType.NotFound:
-                    response = new Response(returnData, message, StatusCodes.Status404NotFound);
+                    response = new Response(returnData, message, StatusCodes.Status404NotFound, success);
                     return StatusCode(StatusCodes.Status404NotFound, response);
                     break;
                 default:
@@ -73,8 +77,10 @@ namespace iRead.API.Controllers
 
         protected enum ResponseType
         {
+            Token,
             Data,
             Created,
+            Updated,
             NotFound,
             BadRequest,
             Error
@@ -83,7 +89,7 @@ namespace iRead.API.Controllers
         internal static class ReturnMessages 
         {
             public const string DefaultErrorMessage = "An error has occured.";
-            public const string DefaultCreatedMessage = "An error has occured.";
+            public const string DefaultCreatedMessage = "Created successfully.";
         }
 
 

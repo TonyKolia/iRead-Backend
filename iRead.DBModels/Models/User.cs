@@ -14,11 +14,12 @@ namespace iRead.DBModels.Models
 
         public int Id { get; set; }
         public string Username { get; set; } = null!;
-        public string Password { get; set; } = null!;
+        public string? Password { get; set; }
         public DateTime RegisterDate { get; set; }
         public DateTime LastLogin { get; set; }
         public int? UserCategory { get; set; }
         public int Active { get; set; }
+        public string? Salt { get; set; }
 
         public virtual UserCategory? UserCategoryNavigation { get; set; }
         public virtual MemberContactInfo MemberContactInfo { get; set; } = null!;

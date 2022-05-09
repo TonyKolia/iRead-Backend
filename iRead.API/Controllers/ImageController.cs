@@ -12,10 +12,10 @@ namespace iRead.API.Controllers
         private readonly IWebHostEnvironment _env;
 
 
-        public ImageController(IWebHostEnvironment env, ILogger<CustomControllerBase> logger):base(logger)
+        public ImageController(IWebHostEnvironment env, IConfiguration _config, ILogger<CustomControllerBase> logger):base(logger)
         {
-            _env = env;
-            _config = new ConfigurationBuilder().SetBasePath(_env.ContentRootPath).AddJsonFile("appsettings.json").Build();
+            this._env = env;
+            this._config = _config;
         }
 
         private static string GetFileExtension(string fileName) => fileName.Substring(fileName.LastIndexOf('.'), fileName.Length - fileName.LastIndexOf('.')).Remove(0, 1);
@@ -27,10 +27,10 @@ namespace iRead.API.Controllers
             try
             {
                 if (string.IsNullOrEmpty(name))
-                    return BadRequest("No image name supplied.");
+                    return ReturnResponse(ResponseType.BadRequest, "No image name supplied.");
 
                 if (!name.Contains('.'))
-                    return BadRequest("No image type (extension) specified.");
+                    return ReturnResponse(ResponseType.BadRequest, "No image type (extension) specified.");
 
                 var bookImagesPathBase = _config.GetValue<string>("ImagePaths:Books");
                 var file = await System.IO.File.ReadAllBytesAsync(Path.Combine(bookImagesPathBase, name));
@@ -39,7 +39,7 @@ namespace iRead.API.Controllers
             catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 
@@ -50,10 +50,10 @@ namespace iRead.API.Controllers
             try
             {
                 if (string.IsNullOrEmpty(name))
-                    return BadRequest("No image name supplied.");
+                    return ReturnResponse(ResponseType.BadRequest, "No image name supplied.");
 
                 if (!name.Contains('.'))
-                    return BadRequest("No image type (extension) specified.");
+                    return ReturnResponse(ResponseType.BadRequest, "No image type (extension) specified.");
 
                 var userImagesPathBase = _config.GetValue<string>("ImagePaths:Users");
                 var file = await System.IO.File.ReadAllBytesAsync(Path.Combine(userImagesPathBase, name));
@@ -62,7 +62,7 @@ namespace iRead.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured");
+                return ReturnResponse(ResponseType.Error);
             }
         }
     }

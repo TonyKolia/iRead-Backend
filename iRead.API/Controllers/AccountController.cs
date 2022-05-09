@@ -13,14 +13,14 @@ namespace iRead.API.Controllers
     {
         private readonly IValidationUtilities _validationUtilities;
         private readonly IUserRepository _userRepository;
-        private readonly IEncryptionUtilities _encryptionUtilities;
+        private readonly IAuthenticationUtilities _authenticationUtilities;
         private readonly IMemberRepository _memberRepository;
 
-        public AccountController(IMemberRepository _memberRepository, IEncryptionUtilities _encryptionUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
+        public AccountController(IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
         {
             this._validationUtilities = _validationUtilities;
             this._userRepository = _userRepository;
-            this._encryptionUtilities = _encryptionUtilities;
+            this._authenticationUtilities = _authenticationUtilities;
             this._memberRepository = _memberRepository;
         }
 
@@ -31,20 +31,23 @@ namespace iRead.API.Controllers
             try
             {
                 if (data == null || !_validationUtilities.IsObjectCompletelyPopulated(data))
-                    return BadRequest("Not all fields have been filled in.");
+                    return ReturnResponse(ResponseType.BadRequest, "Not all fields have been filled in.");
 
                 if(await _userRepository.UserExists(data.Username))
-                    return BadRequest($"User with username {data.Username} already exists.");
+                    return ReturnResponse(ResponseType.BadRequest, $"User with username {data.Username} already exists.");
 
                 var validationResult = _validationUtilities.ValidateRegistrationForm(data);
 
                 if (!validationResult.Success)
                     return BadRequest(validationResult.Messages);
 
+
+                var salt = string.Empty;
                 var accountData = new User
                 {
                     Username = data.Username,
-                    Password = _encryptionUtilities.EncryptPassword(data.Password),
+                    Password = _authenticationUtilities.HashPassword(data.Password, out salt),
+                    Salt = salt,
                     RegisterDate = DateTime.Now,
                     LastLogin = DateTime.Now,
                     UserCategory = 1,
@@ -74,12 +77,12 @@ namespace iRead.API.Controllers
 
                 await _userRepository.UpdateUser(accountData);
 
-                return StatusCode(StatusCodes.Status201Created, await _memberRepository.GetMemberFullInfo(createdUser.Id));
+                return ReturnResponse(ResponseType.Created, "", await _memberRepository.GetMemberFullInfo(createdUser.Id));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 
@@ -88,17 +91,17 @@ namespace iRead.API.Controllers
         public async Task<ActionResult> Login([FromBody] LoginForm form)
         {
             if (form == null || !_validationUtilities.IsObjectCompletelyPopulated(form))
-                return BadRequest("Not all fields have been filled in.");
+                return ReturnResponse(ResponseType.BadRequest, "Not all fields have been filled in.");
 
             if (!await _userRepository.UserExists(form.Username))
-                return BadRequest("Invalid credential combination.");
+                return ReturnResponse(ResponseType.BadRequest, "Invalid credential combination.");
 
             var user = await _userRepository.GetUser(form.Username);
 
-            if (user.Password == _encryptionUtilities.EncryptPassword(form.Password))
-                return Ok();
+            if (_authenticationUtilities.VerifyPasswordHash(form.Password, user.Password, user.Salt))
+                return ReturnResponse(ResponseType.Token, "", new { token = _authenticationUtilities.GenerateToken(user) });
             else
-                return BadRequest("Invalid credential combination.");
+                return ReturnResponse(ResponseType.BadRequest, "Invalid credential combination.");
         }
     }
 }

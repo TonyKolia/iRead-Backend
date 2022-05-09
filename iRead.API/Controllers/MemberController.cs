@@ -23,7 +23,8 @@ namespace iRead.API.Controllers
         [Route("{id}")]
         public async Task<ActionResult<MemberResponse>> GetFullInfo(int id)
         {
-            return await _userRepository.UserExists(id) ? Ok(await _memberRepository.GetMemberFullInfo(id)) : NotFound($"User with id {id} not found.");
+            var user = await _memberRepository.GetMemberFullInfo(id);
+            return ReturnIfNotEmpty(user, $"User with id {id} not found.", false);
         }
 
 
@@ -44,12 +45,12 @@ namespace iRead.API.Controllers
             try
             {
                 var createdPersonalInfo = await _memberRepository.CreateMemberPersonalInfo(personalInfo);
-                return StatusCode(StatusCodes.Status201Created, createdPersonalInfo.MapResponse());
+                return ReturnResponse(ResponseType.Created, "", createdPersonalInfo.MapResponse());
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured, please try again.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 
@@ -60,12 +61,12 @@ namespace iRead.API.Controllers
             try
             {
                 var updatedPersonalInfo = await _memberRepository.UpdateMemberPersonalInfo(personalInfo);
-                return Ok(updatedPersonalInfo.MapResponse());
+                return ReturnResponse(ResponseType.Updated, "", updatedPersonalInfo);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured, please try again.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 
@@ -88,12 +89,12 @@ namespace iRead.API.Controllers
             try
             {
                 var createdContactInfo = await _memberRepository.CreateMemberContactInfo(contactInfo);
-                return StatusCode(StatusCodes.Status201Created, createdContactInfo.MapResponse());
+                return ReturnResponse(ResponseType.Created, "", createdContactInfo);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured, please try again.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 
@@ -104,12 +105,12 @@ namespace iRead.API.Controllers
             try
             {
                 var updatedContactInfo = await _memberRepository.UpdateMemberContactInfo(contactInfo);
-                return Ok(updatedContactInfo.MapResponse());
+                return ReturnResponse(ResponseType.Updated, "", updatedContactInfo);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error has occured, please try again.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
 

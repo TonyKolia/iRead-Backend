@@ -24,12 +24,13 @@ namespace iRead.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status201Created, (await _ratingRepository.CreateRating(rating)).MapResponse());
+                var createdRating = await _ratingRepository.CreateRating(rating);
+                return ReturnResponse(ResponseType.Created, "", createdRating.MapResponse());
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured.");
+                return ReturnResponse(ResponseType.Error);
             }
         }
     }

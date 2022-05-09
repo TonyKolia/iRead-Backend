@@ -5,12 +5,14 @@
         public object Data { get; set; }
         public string Message { get; set; }
         public int StatusCode { get; set; }
+        public bool Success { get; set; }
 
-        public Response(object Data, string Message, int StatusCode)
+        public Response(object Data, string Message, int StatusCode, bool Success)
         {
             this.Data = Data;
             this.Message = Message;
             this.StatusCode = StatusCode;
+            this.Success = Success;
         }
 
         public Response()
@@ -113,6 +115,15 @@
         public int Id { get; set; }
         public string Description { get; set; }
     }
-    
+
+    public class FavoriteResponse
+    {
+        public int UserId { get; set; }
+        public DateTime DateAdded { get; set; }
+        public bool BookRead { get; set; }
+        public BookResponse Book { get; set; }
+    }
+
+
 
 }

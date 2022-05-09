@@ -23,8 +23,8 @@ namespace iRead.API.Controllers
             try
             {
                 //validate order and stock
-                var createdOrder = await _orderRepository.CreateOrder(order);
-                return ReturnResponse(ResponseType.Created, "Created successfully", createdOrder);
+                var createdOrderId = await _orderRepository.CreateOrder(order);
+                return ReturnResponse(ResponseType.Created, "Created successfully", createdOrderId);
             }
             catch(Exception ex)
             {

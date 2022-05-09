@@ -5,9 +5,7 @@ using iRead.API.Utilities;
 using iRead.API.Utilities.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,11 +22,14 @@ builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 
-builder.Services.AddScoped<IEncryptionUtilities, EncryptionUtilities>();
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();
+builder.Services.AddScoped<IAuthenticationUtilities, AuthenticationUtilities>();
+
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
