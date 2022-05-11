@@ -126,6 +126,12 @@
         public BookResponse Book { get; set; }
     }
 
+    public class CriteriaResponse
+    {
+        public IEnumerable<AuthorResponse> Authors { get; set; }
+        public IEnumerable<PublisherResponse> Publishers { get; set; }
+        public IEnumerable<CategoryResponse> Categories { get; set; }
+    }    
 
 
 }

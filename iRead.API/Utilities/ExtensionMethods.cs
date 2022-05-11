@@ -60,5 +60,10 @@ namespace iRead.API.Utilities
 
             //return input;
         }
+
+        public static IEnumerable<T> CastObjectToList<T>(this object list)
+        {
+            return (list as IEnumerable<object>)?.Cast<T>().ToList();
+        }
     }
 }
