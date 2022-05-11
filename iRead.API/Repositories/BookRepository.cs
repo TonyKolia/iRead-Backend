@@ -23,6 +23,7 @@ namespace iRead.API.Repositories
                 PageCount = x.PageCount,
                 Description = x.Description,
                 ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
                 Authors = x.Authors.Select(a => new AuthorResponse
                 {
                     Id = a.Id,
@@ -41,6 +42,12 @@ namespace iRead.API.Repositories
                     Rating = r.Rating1,
                     Comment = r.Comment ?? "",
                     DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
                 })
             }).ToListAsync();
         }
@@ -55,6 +62,9 @@ namespace iRead.API.Repositories
                 PageCount = x.PageCount,
                 Description = x.Description,
                 ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                TotalRatings = x.Ratings.Count(),
+                Rating = x.Ratings.Count() > 0 ? Math.Round(x.Ratings.Average(r => r.Rating1),2) : 0,
                 Authors = x.Authors.Select(a => new AuthorResponse
                 {
                     Id = a.Id,
@@ -73,6 +83,12 @@ namespace iRead.API.Repositories
                     Rating = r.Rating1,
                     Comment = r.Comment ?? "",
                     DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse 
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
                 })
             }).FirstOrDefaultAsync(x => x.Id == id);
         }

@@ -39,11 +39,13 @@
         public int PageCount { get; set; }
         public string Description { get; set; }
         public string ImagePath { get; set; }
-        public decimal Rating { get; set; } = 0;
+        public double Rating { get; set; } = 0;
         public int TotalRatings { get; set; }
+        public DateTime PublishDate { get; set; }
         public IEnumerable<AuthorResponse> Authors { get; set; }
         public IEnumerable<CategoryResponse> Categories { get; set; }
         public IEnumerable<RatingResponse> Ratings { get; set; }
+        public IEnumerable<PublisherResponse> Publishers { get; set; }
     }
 
     public class AuthorResponse
