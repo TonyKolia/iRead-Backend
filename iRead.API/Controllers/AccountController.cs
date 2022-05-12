@@ -91,17 +91,17 @@ namespace iRead.API.Controllers
         public async Task<ActionResult> Login([FromBody] LoginForm form)
         {
             if (form == null || !_validationUtilities.IsObjectCompletelyPopulated(form))
-                return ReturnResponse(ResponseType.BadRequest, "Not all fields have been filled in.");
+                return ReturnResponse(ResponseType.BadRequest, "Παρακαλώ συμπληρώστε όλα τα πεδία");
 
             if (!await _userRepository.UserExists(form.Username))
-                return ReturnResponse(ResponseType.BadRequest, "Invalid credential combination.");
+                return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
 
             var user = await _userRepository.GetUser(form.Username);
 
             if (_authenticationUtilities.VerifyPasswordHash(form.Password, user.Password, user.Salt))
-                return ReturnResponse(ResponseType.Token, "", new { token = _authenticationUtilities.GenerateToken(user) });
+                return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = _authenticationUtilities.GenerateToken(user), UserId = user.Id, Username = user.Username });
             else
-                return ReturnResponse(ResponseType.BadRequest, "Invalid credential combination.");
+                return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
         }
     }
 }
