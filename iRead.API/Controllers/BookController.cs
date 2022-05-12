@@ -1,5 +1,6 @@
 ﻿using iRead.API.Models;
 using iRead.API.Repositories.Interfaces;
+using iRead.API.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,22 @@ namespace iRead.API.Controllers
         {
             var book = await _bookRepository.GetBook(id);
             return ReturnIfNotEmpty(book, $"Book with id {id} not found.", false);
+        }
+
+        [HttpGet]
+        [Route("Multiple/{ids}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> Get(string ids)
+        {
+            try
+            {
+                var books = await _bookRepository.GetBooksByIds(ids.Split('-').ContertToInteger());
+                return ReturnIfNotEmpty(books, "No books found for the provided ids.", false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
         }
     }
 }

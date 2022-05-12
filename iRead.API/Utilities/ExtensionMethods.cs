@@ -65,5 +65,16 @@ namespace iRead.API.Utilities
         {
             return (list as IEnumerable<object>)?.Cast<T>().ToList();
         }
+
+        public static IEnumerable<int> ContertToInteger(this string[] array)
+        {
+            var intList = new List<int>();
+            foreach(var str in array)
+            {
+                intList.Add(int.Parse(str));
+            }
+
+            return intList;
+        }
     }
 }

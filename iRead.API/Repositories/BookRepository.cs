@@ -97,5 +97,44 @@ namespace iRead.API.Repositories
         {
             return new List<BookResponse>();
         }
+
+        public async Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids)
+        {
+            return await _db.Books.Where(x => ids.Contains(x.Id)).Select(x => new BookResponse
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.Isbn,
+                PageCount = x.PageCount,
+                Description = x.Description,
+                ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                Authors = x.Authors.Select(a => new AuthorResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Surname = a.Surname,
+                    Birthdate = a.Birthdate
+                }),
+                Categories = x.Categories.Select(c => new CategoryResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description ?? ""
+                }),
+                Ratings = x.Ratings.Select(r => new RatingResponse
+                {
+                    Username = r.User.Username,
+                    Rating = r.Rating1,
+                    Comment = r.Comment ?? "",
+                    DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
+                })
+            }).ToListAsync();
+        }
     }
 }
