@@ -24,7 +24,7 @@ namespace iRead.API.Controllers
             {
                 //validate order and stock
                 var createdOrderId = await _orderRepository.CreateOrder(order);
-                return ReturnResponse(ResponseType.Created, "Created successfully", createdOrderId);
+                return ReturnResponse(ResponseType.Created, "Created successfully", new { OrderId = createdOrderId });
             }
             catch(Exception ex)
             {
