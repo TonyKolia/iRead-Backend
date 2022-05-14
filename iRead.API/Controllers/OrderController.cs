@@ -1,6 +1,7 @@
 ﻿using iRead.API.Models;
 using iRead.API.Models.Order;
 using iRead.API.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace iRead.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : CustomControllerBase
     {
         private readonly IOrderRepository _orderRepository;

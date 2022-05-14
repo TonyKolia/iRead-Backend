@@ -8,15 +8,15 @@ namespace iRead.API.Utilities
     {
         public bool IsObjectCompletelyPopulated(object obj)
         {
-            foreach(var prop in obj.GetType().GetProperties())
-            {
-                var value = prop.GetValue(obj);
-                if (value == null)
-                    return false;
+            //foreach(var prop in obj.GetType().GetProperties())
+            //{
+            //    var value = prop.GetValue(obj);
+            //    if (value == null)
+            //        return false;
 
-                if (prop.GetType() == typeof(string) && string.IsNullOrEmpty(value.ToString()))
-                    return false;
-            }
+            //    if (prop.GetType() == typeof(string) && string.IsNullOrEmpty(value.ToString()))
+            //        return false;
+            //}
 
             return true;
         }

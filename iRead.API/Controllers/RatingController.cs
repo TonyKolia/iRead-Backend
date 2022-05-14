@@ -2,6 +2,7 @@
 using iRead.API.Models.Rating;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ namespace iRead.API.Controllers
         
         
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<RatingResponse>> Create([FromBody] NewRating rating)
         {
             try

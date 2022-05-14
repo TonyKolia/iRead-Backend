@@ -3,11 +3,13 @@ using iRead.API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using iRead.API.Utilities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace iRead.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MemberController : CustomControllerBase
     {
         private readonly IMemberRepository _memberRepository;
