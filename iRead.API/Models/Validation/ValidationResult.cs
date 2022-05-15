@@ -4,10 +4,19 @@
     {
         public ValidationResult()
         {
-            Messages = new List<string>();
+            Errors = new Dictionary<string, string>();
         }
 
+        public ValidationFailType? ValidationFailType { get; set; } = null;
         public bool Success { get; set; } = true;
-        public List<string> Messages { get; set; }
+        public Dictionary<string, string> Errors { get; set; }
+        public IEnumerable<string> EmptyFields { get; set; }
     }
+
+    public enum ValidationFailType
+    {
+        EmptyFields,
+        WrongData
+    }
+
 }

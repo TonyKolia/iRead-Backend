@@ -30,16 +30,10 @@ namespace iRead.API.Controllers
         {
             try
             {
-                if (data == null || !_validationUtilities.IsObjectCompletelyPopulated(data))
-                    return ReturnResponse(ResponseType.BadRequest, "Not all fields have been filled in.");
-
-                if(await _userRepository.UserExists(data.Username))
-                    return ReturnResponse(ResponseType.BadRequest, $"User with username {data.Username} already exists.");
-
-                var validationResult = _validationUtilities.ValidateRegistrationForm(data);
+                var validationResult = await _validationUtilities.ValidateRegistrationForm(data);
 
                 if (!validationResult.Success)
-                    return BadRequest(validationResult.Messages);
+                    return ReturnResponse(ResponseType.BadRequest, "Errors occured during validation", validationResult);
 
 
                 var salt = string.Empty;

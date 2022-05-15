@@ -41,6 +41,11 @@ namespace iRead.API.Repositories
                 return null;
         }
 
+        public async Task<bool> IdNumberExists(string idNumber)
+        {
+            return await _db.MemberPersonalInfos.AnyAsync(x => x.IdNumber == idNumber);
+        }
+
         #endregion
 
         #region Contact Info

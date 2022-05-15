@@ -45,7 +45,7 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
-        [Route("user/{userId}")]
+        [Route("User/{userId}")]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetByUser(int userId)
         {
             var orders = await _orderRepository.GetUserOrders(userId);

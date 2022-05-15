@@ -6,6 +6,7 @@ namespace iRead.API.Utilities.Interfaces
     public interface IValidationUtilities
     {
         bool IsObjectCompletelyPopulated(object obj);
-        ValidationResult ValidateRegistrationForm(RegistrationForm form);
+        IEnumerable<string> FindEmptyObjectFields(object obj);
+        Task<ValidationResult> ValidateRegistrationForm(RegistrationForm form);
     }
 }

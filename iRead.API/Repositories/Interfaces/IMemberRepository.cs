@@ -9,6 +9,7 @@ namespace iRead.API.Repositories.Interfaces
         Task<MemberPersonalInfo> GetMemberPersonalInfo(int id);
         Task<MemberPersonalInfo> CreateMemberPersonalInfo(MemberPersonalInfo personalInfo);
         Task<MemberPersonalInfo> UpdateMemberPersonalInfo(MemberPersonalInfo personalInfo);
+        Task<bool> IdNumberExists(string idNumber);
 
         #endregion
 

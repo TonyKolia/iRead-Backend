@@ -5,6 +5,7 @@
         //account info
         public string Username { get; set; }
         public string Password { get; set; }
+        public string ConfirmPassword { get; set; }
 
         //personal info
         public string Name { get; set; }
@@ -21,6 +22,9 @@
         public string PostalCode { get; set; }
         public string Telephone { get; set; }
         public string Email { get; set; }
+
+        //terms of service -- just for check
+        public bool AcceptTerms { get; set; }
 
     }
 }
