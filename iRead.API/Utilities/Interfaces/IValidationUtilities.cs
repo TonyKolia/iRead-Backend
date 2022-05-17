@@ -8,5 +8,6 @@ namespace iRead.API.Utilities.Interfaces
         bool IsObjectCompletelyPopulated(object obj);
         IEnumerable<string> FindEmptyObjectFields(object obj);
         Task<ValidationResult> ValidateRegistrationForm(RegistrationForm form);
+        Task<ValidationResult> ValidateOrder(IEnumerable<int> orderItems, int userId);
     }
 }

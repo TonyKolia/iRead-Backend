@@ -8,5 +8,7 @@ namespace iRead.API.Repositories.Interfaces
         Task<BookResponse> GetBook(int id);
         Task<IEnumerable<BookResponse>> GetBooksByCategory(int categoryId);
         Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids);
+        Task UpdateBookStock(IEnumerable<int> books);
+        Task<int> GetBookStock(int bookId);
     }
 }

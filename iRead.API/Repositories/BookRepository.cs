@@ -24,6 +24,7 @@ namespace iRead.API.Repositories
                 Description = x.Description,
                 ImagePath = x.ImagePath ?? "",
                 PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
                 Authors = x.Authors.Select(a => new AuthorResponse
                 {
                     Id = a.Id,
@@ -65,6 +66,7 @@ namespace iRead.API.Repositories
                 PublishDate = x.PublishDate.Value,
                 TotalRatings = x.Ratings.Count(),
                 Rating = x.Ratings.Count() > 0 ? Math.Round(x.Ratings.Average(r => r.Rating1),2) : 0,
+                Stock = x.BooksStock.Stock,
                 Authors = x.Authors.Select(a => new AuthorResponse
                 {
                     Id = a.Id,
@@ -109,6 +111,7 @@ namespace iRead.API.Repositories
                 Description = x.Description,
                 ImagePath = x.ImagePath ?? "",
                 PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
                 Authors = x.Authors.Select(a => new AuthorResponse
                 {
                     Id = a.Id,
@@ -135,6 +138,23 @@ namespace iRead.API.Repositories
                     Description = p.Description ?? ""
                 })
             }).ToListAsync();
+        }
+
+        public async Task<int> GetBookStock(int bookId)
+        {
+            return await _db.BooksStocks.Where(x => x.BookId == bookId).Select(x => x.Stock).FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateBookStock(IEnumerable<int> books)
+        {
+            foreach(var book in books)
+            {
+                var currentStock = await _db.BooksStocks.FirstOrDefaultAsync(x => x.BookId == book);
+                currentStock.Stock--;
+                _db.Entry(currentStock).State = EntityState.Modified;
+            }
+
+            await _db.SaveChangesAsync();
         }
     }
 }

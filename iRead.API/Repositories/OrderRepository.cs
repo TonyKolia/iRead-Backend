@@ -8,10 +8,12 @@ namespace iRead.API.Repositories
     public class OrderRepository : IOrderRepository
     {
         private readonly iReadDBContext _db;
+        private readonly IBookRepository _bookRepository;
 
-        public OrderRepository(iReadDBContext _db)
+        public OrderRepository(IBookRepository _bookRepository, iReadDBContext _db)
         {
             this._db = _db;
+            this._bookRepository = _bookRepository;
         }
 
         public async Task<string> CreateOrder(NewOrder newOrder)
@@ -27,6 +29,7 @@ namespace iRead.API.Repositories
 
             _db.Entry(order).State = EntityState.Added;
             await _db.SaveChangesAsync();
+            await _bookRepository.UpdateBookStock(newOrder.Books);
 
             return order.Id.ToString();
         }

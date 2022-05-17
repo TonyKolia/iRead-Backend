@@ -16,7 +16,7 @@ namespace iRead.API.Controllers
         protected ActionResult ReturnResponse(ResponseType type, string message = "", object returnData = null)
         {
             Response response = null;
-            var success = type == ResponseType.Created || type == ResponseType.Data || type == ResponseType.Updated || type == ResponseType.Token;
+            var success = type == ResponseType.Created || type == ResponseType.Data || type == ResponseType.Updated || type == ResponseType.Token || type == ResponseType.Deleted;
 
             switch (type) 
             {
@@ -34,6 +34,7 @@ namespace iRead.API.Controllers
                 case ResponseType.Data:
                 case ResponseType.Updated:
                 case ResponseType.Token:
+                case ResponseType.Deleted:
                     response = new Response(returnData, message, StatusCodes.Status200OK, success);
                     return StatusCode(StatusCodes.Status200OK, response);
                     break;
@@ -79,6 +80,7 @@ namespace iRead.API.Controllers
 
         protected enum ResponseType
         {
+            Deleted,
             Token,
             Data,
             Created,

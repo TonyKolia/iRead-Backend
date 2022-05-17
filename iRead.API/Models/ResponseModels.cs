@@ -41,6 +41,7 @@
         public string ImagePath { get; set; }
         public double Rating { get; set; } = 0;
         public int TotalRatings { get; set; }
+        public int Stock { get; set; }
         public DateTime PublishDate { get; set; }
         public IEnumerable<AuthorResponse> Authors { get; set; }
         public IEnumerable<CategoryResponse> Categories { get; set; }

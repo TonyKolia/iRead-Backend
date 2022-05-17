@@ -27,6 +27,14 @@ namespace iRead.API.Controllers
             return ReturnIfNotEmpty(userFavorites, $"No favorites found for user with id {userId}.", false);
         }
 
+        [HttpGet]
+        [Route("User/{userId}/Book/{bookId}")]
+        public async Task<ActionResult> FavoriteExists(int userId, int bookId)
+        {
+            var bookExists = await _favoriteRepository.FavoriteExists(bookId, userId);
+            return ReturnResponse(ResponseType.Data, "", bookExists);
+        }
+
         [HttpPost]
         public async Task<ActionResult<FavoriteResponse>> Create([FromBody] NewFavorite favorite)
         {
@@ -41,6 +49,25 @@ namespace iRead.API.Controllers
                 return ReturnResponse(ResponseType.Error);
             }
 
+        }
+
+        [HttpDelete]
+        [Route("User/{userId}/Book/{bookId}")]
+        public async Task<ActionResult> Delete(int userId, int bookId)
+        {
+            try
+            {
+                if (!await _favoriteRepository.FavoriteExists(bookId, userId))
+                    return ReturnResponse(ResponseType.NotFound, "This favorite was not found.");
+
+                await _favoriteRepository.DeleteFavorite(bookId, userId);
+                return ReturnResponse(ResponseType.Deleted, "Αφαιρέθηκε με επιτυχία.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
         }
 
     }

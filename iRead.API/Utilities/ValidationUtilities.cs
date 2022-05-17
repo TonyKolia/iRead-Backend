@@ -9,11 +9,13 @@ namespace iRead.API.Utilities
     {
         private readonly IUserRepository _userRepository;
         private readonly IMemberRepository _memberRepository;
+        private readonly IBookRepository _bookRepository;
 
-        public ValidationUtilities(IUserRepository _userRepository, IMemberRepository _memberRepository)
+        public ValidationUtilities(IUserRepository _userRepository, IMemberRepository _memberRepository, IBookRepository _bookRepository)
         {
             this._userRepository = _userRepository;
             this._memberRepository = _memberRepository;
+            this._bookRepository = _bookRepository;
         }
 
         public bool IsObjectCompletelyPopulated(object obj)
@@ -106,6 +108,51 @@ namespace iRead.API.Utilities
                 return false;
 
             return true;
+        }
+
+        public async Task<ValidationResult> ValidateOrder(IEnumerable<int> orderItems, int userId)
+        {
+            var res = new ValidationResult();
+
+            if (!await _userRepository.UserExists(userId))
+                res.Errors.Add("user", "Ο χρήστης δεν υπάρχει.");
+
+            if(orderItems.Count() == 0)
+                res.Errors.Add("noItems", "Δεν προστέθηκαν βιβλία στην παραγγελία.");
+
+            if(res.Errors.Count() > 0)
+            {
+                res.Success = false;
+                res.ValidationFailType = ValidationFailType.WrongData;
+                return res;
+            }
+            
+            var bookNotFound = false;
+            foreach(var item in orderItems)
+            {
+                if(await _bookRepository.GetBook(item) == null)
+                {
+                    bookNotFound = true;
+                    break;
+                }
+            }
+
+            if (bookNotFound)
+                res.Errors.Add("itemsNotFound", "Κάποια από τα βιβλία δεν υπάρχουν.");
+
+            foreach(var item in orderItems)
+            {
+                if (await _bookRepository.GetBookStock(item) == 0)
+                    res.Errors.Add($"book{item}", "Το βιβλίο δεν είναι διαθέσιμο.");
+            }
+
+            if (res.Errors.Count() > 0)
+            {
+                res.Success = false;
+                res.ValidationFailType = ValidationFailType.WrongData;
+            }
+
+            return res;
         }
     }
 }
