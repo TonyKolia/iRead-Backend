@@ -1,4 +1,5 @@
-﻿using iRead.API.Models.Rating;
+﻿using iRead.API.Models;
+using iRead.API.Models.Rating;
 using iRead.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,9 +32,47 @@ namespace iRead.API.Repositories
             return newRating;
         }
 
-        public async Task<IEnumerable<Rating>> GetBookRatings(int bookId)
+        public async Task<BookRatingsResponse> GetBookRatings(int bookId)
         {
-            return await _db.Ratings.Where(x => x.BookId == bookId).ToListAsync();
+            return await _db.Books.Where(x => x.Id == bookId).Select(x => new BookRatingsResponse
+            {
+                BookId = x.Id,
+                BookTitle = x.Title,
+                Ratings = x.Ratings.Select(r => new RatingResponse 
+                {
+                    Username = r.User.Username,
+                    DateAdded = r.DateAdded,
+                    Comment = r.Comment ?? "",
+                    Rating = r.Rating1
+                }).ToList()
+            }).FirstOrDefaultAsync();
+        }
+
+        public async Task<Rating> GetRating(int userId, int bookId)
+        {
+            return await _db.Ratings.FirstOrDefaultAsync(x => x.UserId == userId && x.BookId == bookId);
+        }
+
+        public async Task<RatingResponse> UpdateRating(NewRating rating)
+        {
+            var ratingToUpdate = await GetRating(rating.UserId, rating.BookId);
+            if (rating.Rating != ratingToUpdate.Rating1)
+                ratingToUpdate.Rating1 = rating.Rating;
+
+            if (rating.Comment != ratingToUpdate.Comment)
+                ratingToUpdate.Comment = rating.Comment;
+
+            _db.Entry(ratingToUpdate).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return new RatingResponse();
+        }
+
+        public async Task DeleteRating(int userId, int bookId)
+        {
+            var ratingToDelete = await GetRating(userId, bookId);
+            _db.Entry(ratingToDelete).State = EntityState.Deleted;
+            await _db.SaveChangesAsync();
         }
     }
 }

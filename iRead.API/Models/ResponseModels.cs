@@ -92,6 +92,13 @@
 
     }
 
+    public class BookRatingsResponse
+    {
+        public int BookId { get; set; }
+        public string BookTitle { get; set; }
+        public IEnumerable<RatingResponse> Ratings { get; set; }
+    }
+
     public class RatingResponse
     {
         public string Username { get; set; }
