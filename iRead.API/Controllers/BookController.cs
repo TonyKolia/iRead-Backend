@@ -41,11 +41,43 @@ namespace iRead.API.Controllers
                 var books = await _bookRepository.GetBooksByIds(ids.Split('-').ContertToInteger());
                 return ReturnIfNotEmpty(books, "No books found for the provided ids.", false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return ReturnResponse(ResponseType.Error);
             }
+        }
+
+        [HttpGet]
+        [Route("Category/{id}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByCategory(int id)
+        {
+            var books = await _bookRepository.GetBooksByCategory(id);
+            return ReturnIfNotEmpty(books, "No books found for this category", false);
+        }
+
+        [HttpGet]
+        [Route("Authors/{authors}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByAuthors(string authors)
+        {
+            var books = await _bookRepository.GetBooksByAuthors(authors.Split('-').ContertToInteger());
+            return ReturnIfNotEmpty(books, "No books found for these filters.", false);
+        }
+
+        [HttpGet]
+        [Route("Publishers/{publishers}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByPublishers(string publishers)
+        {
+            var books = await _bookRepository.GetBooksByPublishers(publishers.Split('-').ContertToInteger());
+            return ReturnIfNotEmpty(books, "No books found for these filters.", false);
+        }
+
+        [HttpGet]
+        [Route("Authors/{authors}/Publishers/{publishers}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string? authors, string? publishers)
+        {
+            var books = await _bookRepository.GetBooksByFilters(authors.Split('-').ContertToInteger(), publishers.Split('-').ContertToInteger());
+            return ReturnIfNotEmpty(books, "No books found for these filters.", false);
         }
     }
 }

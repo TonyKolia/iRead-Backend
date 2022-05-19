@@ -97,7 +97,162 @@ namespace iRead.API.Repositories
 
         public async Task<IEnumerable<BookResponse>> GetBooksByCategory(int categoryId)
         {
-            return new List<BookResponse>();
+            return await _db.Books.Where(x => x.Categories.Any(c => c.Id == categoryId)).Select(x => new BookResponse
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.Isbn,
+                PageCount = x.PageCount,
+                Description = x.Description,
+                ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
+                Authors = x.Authors.Select(a => new AuthorResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Surname = a.Surname,
+                    Birthdate = a.Birthdate
+                }),
+                Categories = x.Categories.Select(c => new CategoryResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description ?? ""
+                }),
+                Ratings = x.Ratings.Select(r => new RatingResponse
+                {
+                    Username = r.User.Username,
+                    Rating = r.Rating1,
+                    Comment = r.Comment ?? "",
+                    DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
+                })
+            }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookResponse>> GetBooksByPublishers(IEnumerable<int> publishers)
+        {
+            return await _db.Books.Where(x => x.Publishers.Any(a => publishers.Contains(a.Id))).Select(x => new BookResponse
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.Isbn,
+                PageCount = x.PageCount,
+                Description = x.Description,
+                ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
+                Authors = x.Authors.Select(a => new AuthorResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Surname = a.Surname,
+                    Birthdate = a.Birthdate
+                }),
+                Categories = x.Categories.Select(c => new CategoryResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description ?? ""
+                }),
+                Ratings = x.Ratings.Select(r => new RatingResponse
+                {
+                    Username = r.User.Username,
+                    Rating = r.Rating1,
+                    Comment = r.Comment ?? "",
+                    DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
+                })
+            }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookResponse>> GetBooksByAuthors(IEnumerable<int> authors)
+        {
+            return await _db.Books.Where(x => x.Authors.Any(a => authors.Contains(a.Id))).Select(x => new BookResponse
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.Isbn,
+                PageCount = x.PageCount,
+                Description = x.Description,
+                ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
+                Authors = x.Authors.Select(a => new AuthorResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Surname = a.Surname,
+                    Birthdate = a.Birthdate
+                }),
+                Categories = x.Categories.Select(c => new CategoryResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description ?? ""
+                }),
+                Ratings = x.Ratings.Select(r => new RatingResponse
+                {
+                    Username = r.User.Username,
+                    Rating = r.Rating1,
+                    Comment = r.Comment ?? "",
+                    DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
+                })
+            }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int> authors, IEnumerable<int> publishers)
+        {
+            return await _db.Books.Where(x => x.Authors.Any(a => authors.Contains(a.Id)) && x.Publishers.Any(p => publishers.Contains(p.Id))).Select(x => new BookResponse
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ISBN = x.Isbn,
+                PageCount = x.PageCount,
+                Description = x.Description,
+                ImagePath = x.ImagePath ?? "",
+                PublishDate = x.PublishDate.Value,
+                Stock = x.BooksStock.Stock,
+                Authors = x.Authors.Select(a => new AuthorResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Surname = a.Surname,
+                    Birthdate = a.Birthdate
+                }),
+                Categories = x.Categories.Select(c => new CategoryResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description ?? ""
+                }),
+                Ratings = x.Ratings.Select(r => new RatingResponse
+                {
+                    Username = r.User.Username,
+                    Rating = r.Rating1,
+                    Comment = r.Comment ?? "",
+                    DateAdded = r.DateAdded
+                }),
+                Publishers = x.Publishers.Select(p => new PublisherResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description ?? ""
+                })
+            }).ToListAsync();
         }
 
         public async Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids)
