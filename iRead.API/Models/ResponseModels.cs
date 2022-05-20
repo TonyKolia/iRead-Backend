@@ -139,6 +139,8 @@
         public IEnumerable<AuthorResponse> Authors { get; set; }
         public IEnumerable<PublisherResponse> Publishers { get; set; }
         public IEnumerable<CategoryResponse> Categories { get; set; }
+        public int MinYear { get; set; }
+        public int MaxYear { get; set; }
     }    
 
     public class LoginResponse
