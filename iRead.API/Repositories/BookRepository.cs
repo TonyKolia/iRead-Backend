@@ -2,6 +2,7 @@
 using iRead.API.Repositories.Interfaces;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using iRead.API.Utilities;
 
 namespace iRead.API.Repositories
 {
@@ -216,51 +217,37 @@ namespace iRead.API.Repositories
             }).ToListAsync();
         }
 
-        public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int> authors, IEnumerable<int> publishers, int? minYear, int? maxYear, int? categoryId)
+        public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int> authors, IEnumerable<int> publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems)
         {
             var books = _db.Books.AsQueryable();
-            var predicate = PredicateBuilder.New<Book>();
+            
             var hasFilters = false;
 
             if (minYear.HasValue)
-            {
                 books = books.Where(x => x.PublishDate.Value.Year >= minYear.Value);
-                //predicate = predicate.And(x => x.PublishDate.Value.Year >= minYear.Value);
-                hasFilters = true;
-            }
 
             if (maxYear.HasValue)
-            {
-                hasFilters = true;
-                //predicate = predicate.And(x => x.PublishDate.Value.Year <= maxYear.Value);
                 books = books.Where(x => x.PublishDate.Value.Year <= maxYear.Value);
-            }
 
             if (authors.Count() > 0)
-            {
-                hasFilters = true;
-                //predicate = predicate.And(x => x.Authors.Any(a => authors.Contains(a.Id)));
                 books = books.Where(x => x.Authors.Any(a => authors.Contains(a.Id)));
-            }
 
             if (publishers.Count() > 0)
-            {
-                //predicate = predicate.And(x => x.Publishers.Any(p => publishers.Contains(p.Id)));
                 books = books.Where(x => x.Publishers.Any(p => publishers.Contains(p.Id)));
-                hasFilters = true;
-            }
                 
             if (categoryId.HasValue)
-            {
-                //predicate = predicate.And(x => x.Categories.Any(c => c.Id == categoryId.Value));
                 books = books.Where(x => x.Categories.Any(c => c.Id == categoryId.Value));
-                hasFilters = true;
-            }
                 
-            //if(hasFilters)
-            //    books = books.AsExpandableEFCore().Where(predicate);
+            if(searchItems.Count() > 0)
+            {
+                var predicate = PredicateBuilder.New<Book>();
+                foreach (var searchItem in searchItems)
+                    predicate = predicate.Or(x => x.Title.ToLower().Contains(searchItem.ToLower()));
 
-            return await books.Select(x => new BookResponse
+                books = books.AsExpandableEFCore().Where(predicate);
+            }
+
+            var foundBooks = await books.Select(x =>  new BookResponse
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -295,9 +282,12 @@ namespace iRead.API.Repositories
                     Name = p.Name,
                     Description = p.Description ?? ""
                 })
+            
             }).ToListAsync();
 
+            return foundBooks.OrderFoundBooks(searchItems);
         }
+
 
         public async Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids)
         {

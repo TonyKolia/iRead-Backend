@@ -6,12 +6,6 @@ namespace iRead.API.Utilities
     {
         public static object MapResponse<T>(this IEnumerable<T> list)
         {
-            //var mappedList = new List<T>();
-            //foreach(var input in list)
-            //{
-            //    mappedList.Add((T)MapResponse<T>(input));
-            //}
-
             var mappedList = new List<object>();
             foreach(var input in list)
             {
@@ -19,15 +13,9 @@ namespace iRead.API.Utilities
             }
 
             return mappedList;
-
-            //var mapper = new ResponseModelMapper();
-            //var type = typeof(T);
-
-            //if (type == typeof(Publisher))
-            //    return mapper.MapPublishers((IEnumerable<Publisher>)list);
-
-            //return list;
         }
+
+
 
         public static object MapResponse<T>(this T input)
         {
@@ -47,18 +35,6 @@ namespace iRead.API.Utilities
             }
 
             return mappedObject;
-
-
-            //var mapper = new ResponseModelMapper();
-            //var type = typeof(T);
-            //if (type == typeof(Publisher))
-            //    return mapper.MapPublisher(input as Publisher);
-            //else if (type == typeof(MemberPersonalInfo))
-            //    return mapper.MapMemberPersonalInfo(input as MemberPersonalInfo);
-            //else if (type == typeof(MemberContactInfo))
-            //    return mapper.MapMemberContactInfo(input as MemberContactInfo);
-
-            //return input;
         }
 
         public static IEnumerable<T> CastObjectToList<T>(this object list)
@@ -75,6 +51,29 @@ namespace iRead.API.Utilities
             }
 
             return intList;
+        }
+
+        public static IEnumerable<BookResponse> OrderFoundBooks(this List<BookResponse> books, IEnumerable<string> searchItems)
+        {
+            if (searchItems.Count() == 0 || books.Count() == 0)
+                return books;
+
+            var booksRanks = new Dictionary<BookResponse, int>();
+
+
+            foreach (var book in books)
+            {
+                var score = 0;
+                foreach (var item in searchItems)
+                {
+                    if (book.Title.Contains(item))
+                        score++;
+                }
+
+                booksRanks.Add(book, score);
+            }
+
+            return booksRanks.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
         }
     }
 }

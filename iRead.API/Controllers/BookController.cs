@@ -73,32 +73,45 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
-        [Route("Category/{category}/Authors/{authors}/Publishers/{publishers}/MinYear/{minYear}/MaxYear/{maxYear}")]
-        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string category, string authors, string publishers, string minYear, string maxYear)
+        [Route("Category/{category}/Authors/{authors}/Publishers/{publishers}/MinYear/{minYear}/MaxYear/{maxYear}/SearchString/{searchString}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string category, string authors, string publishers, string minYear, string maxYear, string searchString)
         {
-            int? categoryId = null;
-            int? minYearValue = null;
-            int? maxYearValue = null;
-            var authorList = new List<int>();
-            var publisherList = new List<int>();
+            try
+            {
+                int? categoryId = null;
+                int? minYearValue = null;
+                int? maxYearValue = null;
+                var authorList = new List<int>();
+                var publisherList = new List<int>();
+                var searchItems = new List<string>();
 
-            if (!string.IsNullOrEmpty(category) && category != "ALL")
-                categoryId = int.Parse(category);
+                if (!string.IsNullOrEmpty(category) && category != "ALL")
+                    categoryId = int.Parse(category);
 
-            if (!string.IsNullOrEmpty(authors) && authors != "ALL")
-                authorList = authors.Split('-').ContertToInteger().ToList();
+                if (!string.IsNullOrEmpty(authors) && authors != "ALL")
+                    authorList = authors.Split('-').ContertToInteger().ToList();
 
-            if (!string.IsNullOrEmpty(publishers) && publishers != "ALL")
-                publisherList = publishers.Split('-').ContertToInteger().ToList();
+                if (!string.IsNullOrEmpty(publishers) && publishers != "ALL")
+                    publisherList = publishers.Split('-').ContertToInteger().ToList();
 
-            if (!string.IsNullOrEmpty(minYear) && minYear != "ALL")
-                minYearValue = int.Parse(minYear);
+                if (!string.IsNullOrEmpty(minYear) && minYear != "ALL")
+                    minYearValue = int.Parse(minYear);
 
-            if (!string.IsNullOrEmpty(maxYear) && maxYear != "ALL")
-                maxYearValue = int.Parse(maxYear);
+                if (!string.IsNullOrEmpty(maxYear) && maxYear != "ALL")
+                    maxYearValue = int.Parse(maxYear);
 
-            var books = await _bookRepository.GetBooksByFilters(authorList, publisherList, minYearValue, maxYearValue, categoryId);
-            return ReturnIfNotEmpty(books, "No books found for these filters.", false);
+                if (!string.IsNullOrEmpty(searchString) && searchString != "%%%")
+                    searchItems = searchString.Split(' ').ToList();
+
+                var books = await _bookRepository.GetBooksByFilters(authorList, publisherList, minYearValue, maxYearValue, categoryId, searchItems);
+                return ReturnIfNotEmpty(books, "No books found for these filters.", false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+
         }
     }
 }
