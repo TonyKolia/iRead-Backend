@@ -46,6 +46,9 @@ namespace iRead.API.Repositories
 
         public async Task<FavoriteResponse> GetFavorite(int userId, int bookId)
         {
+            if (!_db.Favorites.Any(x => x.UserId == userId && x.BookId == bookId))
+                return null;
+
             return await _db.Favorites.Select(x => new FavoriteResponse
             {
                 DateAdded = x.DateAdded,

@@ -73,8 +73,8 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
-        [Route("Category/{category}/Authors/{authors}/Publishers/{publishers}/MinYear/{minYear}/MaxYear/{maxYear}/SearchString/{searchString}")]
-        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string category, string authors, string publishers, string minYear, string maxYear, string searchString)
+        [Route("Category/{category}/Authors/{authors}/Publishers/{publishers}/MinYear/{minYear}/MaxYear/{maxYear}/SearchString/{searchString}/Type/{type}")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string category, string authors, string publishers, string minYear, string maxYear, string searchString, string type)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace iRead.API.Controllers
                 if (!string.IsNullOrEmpty(searchString) && searchString != "%%%")
                     searchItems = searchString.Split(' ').ToList();
 
-                var books = await _bookRepository.GetBooksByFilters(authorList, publisherList, minYearValue, maxYearValue, categoryId, searchItems);
+                var books = await _bookRepository.GetBooksByFilters(authorList, publisherList, minYearValue, maxYearValue, categoryId, searchItems, type);
                 return ReturnIfNotEmpty(books, "No books found for these filters.", false);
             }
             catch(Exception ex)

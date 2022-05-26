@@ -53,7 +53,7 @@ namespace iRead.API.Utilities
             return intList;
         }
 
-        public static IEnumerable<BookResponse> OrderFoundBooks(this List<BookResponse> books, IEnumerable<string> searchItems)
+        public static List<BookResponse> OrderFoundBooks(this List<BookResponse> books, IEnumerable<string> searchItems)
         {
             if (searchItems.Count() == 0 || books.Count() == 0)
                 return books;

@@ -217,11 +217,12 @@ namespace iRead.API.Repositories
             }).ToListAsync();
         }
 
-        public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int> authors, IEnumerable<int> publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems)
+        public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int> authors, IEnumerable<int> publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems, string type)
         {
             var books = _db.Books.AsQueryable();
-            
-            var hasFilters = false;
+
+            var forHome = type.Contains("-home");
+            var sortType = type.Split('-')[0];
 
             if (minYear.HasValue)
                 books = books.Where(x => x.PublishDate.Value.Year >= minYear.Value);
@@ -245,6 +246,20 @@ namespace iRead.API.Repositories
                     predicate = predicate.Or(x => x.Title.ToLower().Contains(searchItem.ToLower()));
 
                 books = books.AsExpandableEFCore().Where(predicate);
+            }
+
+            switch (sortType)
+            {
+                case "recommended":
+                default:
+                    break;
+
+                case "new":
+                    books = books.OrderByDescending(x => x.PublishDate);
+                    break;
+                case "hot":
+                    books = books.OrderByDescending(x => x.Orders.Count());
+                    break;
             }
 
             var foundBooks = await books.Select(x =>  new BookResponse
@@ -284,6 +299,9 @@ namespace iRead.API.Repositories
                 })
             
             }).ToListAsync();
+
+            if (forHome)
+                foundBooks = foundBooks.Count() >= 6 ? foundBooks.Take(6).ToList() : foundBooks;
 
             return foundBooks.OrderFoundBooks(searchItems);
         }
