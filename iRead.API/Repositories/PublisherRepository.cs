@@ -19,7 +19,7 @@ namespace iRead.API.Repositories
 
         public async Task<IEnumerable<Publisher>> GetPublishers()
         {
-            return await _db.Publishers.ToListAsync();
+            return await _db.Publishers.OrderBy(x => x.Name).ToListAsync();
         }
     }
 }

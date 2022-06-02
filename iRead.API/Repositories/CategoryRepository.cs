@@ -14,7 +14,7 @@ namespace iRead.API.Repositories
 
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            return await _db.Categories.ToListAsync();
+            return await _db.Categories.OrderBy(x => x.Description).ToListAsync();
         }
 
         public async Task<Category> GetCategory(int id)
