@@ -34,35 +34,31 @@ namespace iRead.DBModels.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.UseCollation("SQL_Latin1_General_CP1253_CI_AI");
+
             modelBuilder.Entity<Author>(entity =>
             {
                 entity.Property(e => e.Birthdate).HasColumnType("datetime");
 
-                entity.Property(e => e.Name)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Surname)
                     .HasMaxLength(255)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
             });
 
             modelBuilder.Entity<Book>(entity =>
             {
-                entity.Property(e => e.Description).HasColumnType("text");
-
-                entity.Property(e => e.ImagePath)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.ImagePath).HasMaxLength(500);
 
                 entity.Property(e => e.Isbn)
                     .HasMaxLength(30)
                     .IsUnicode(false)
-                    .HasColumnName("ISBN");
+                    .HasColumnName("ISBN")
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
-                entity.Property(e => e.Title)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Title).HasMaxLength(500);
 
                 entity.HasMany(d => d.Authors)
                     .WithMany(p => p.Books)
@@ -122,9 +118,7 @@ namespace iRead.DBModels.Models
 
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
 
             modelBuilder.Entity<Favorite>(entity =>
@@ -147,16 +141,12 @@ namespace iRead.DBModels.Models
 
             modelBuilder.Entity<Gender>(entity =>
             {
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
 
             modelBuilder.Entity<IdentificationMethod>(entity =>
             {
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
 
             modelBuilder.Entity<MemberContactInfo>(entity =>
@@ -168,25 +158,24 @@ namespace iRead.DBModels.Models
 
                 entity.Property(e => e.UserId).ValueGeneratedNever();
 
-                entity.Property(e => e.Address)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Address).HasMaxLength(255);
 
-                entity.Property(e => e.City)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.City).HasMaxLength(255);
 
                 entity.Property(e => e.Email)
                     .HasMaxLength(255)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.Property(e => e.PostalCode)
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.Property(e => e.Telephone)
                     .HasMaxLength(30)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.HasOne(d => d.User)
                     .WithOne(p => p.MemberContactInfo)
@@ -209,15 +198,12 @@ namespace iRead.DBModels.Models
 
                 entity.Property(e => e.IdNumber)
                     .HasMaxLength(50)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
-                entity.Property(e => e.Name)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Name).HasMaxLength(255);
 
-                entity.Property(e => e.Surname)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Surname).HasMaxLength(255);
 
                 entity.HasOne(d => d.GenderNavigation)
                     .WithMany(p => p.MemberPersonalInfos)
@@ -270,26 +256,22 @@ namespace iRead.DBModels.Models
 
             modelBuilder.Entity<OrderStatus>(entity =>
             {
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
 
             modelBuilder.Entity<Publisher>(entity =>
             {
-                entity.Property(e => e.Description).HasColumnType("text");
+                entity.Property(e => e.Description)
+                    .HasColumnType("text")
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
-                entity.Property(e => e.Name)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Name).HasMaxLength(255);
             });
 
             modelBuilder.Entity<Rating>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.BookId })
                     .HasName("PK__Ratings__7456C06C0FCC6B5A");
-
-                entity.Property(e => e.Comment).HasColumnType("text");
 
                 entity.Property(e => e.Rating1).HasColumnName("Rating");
 
@@ -310,27 +292,56 @@ namespace iRead.DBModels.Models
             {
                 entity.Property(e => e.LastLogin).HasColumnType("datetime");
 
-                entity.Property(e => e.Password).IsUnicode(false);
+                entity.Property(e => e.Password)
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.Property(e => e.RegisterDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Salt).IsUnicode(false);
+                entity.Property(e => e.Salt)
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(255)
-                    .IsUnicode(false);
+                    .IsUnicode(false)
+                    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                 entity.HasOne(d => d.UserCategoryNavigation)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserCategory)
                     .HasConstraintName("FK__Users__UserCateg__36B12243");
+
+                entity.HasMany(d => d.Authors)
+                    .WithMany(p => p.Users)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "UserFavoriteAuthor",
+                        l => l.HasOne<Author>().WithMany().HasForeignKey("AuthorId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__UserFavor__Autho__7849DB76"),
+                        r => r.HasOne<User>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__UserFavor__UserI__7755B73D"),
+                        j =>
+                        {
+                            j.HasKey("UserId", "AuthorId").HasName("PK__UserFavo__4085638F1CF9EA1E");
+
+                            j.ToTable("UserFavoriteAuthors");
+                        });
+
+                entity.HasMany(d => d.Categories)
+                    .WithMany(p => p.Users)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "UserFavoriteCategory",
+                        l => l.HasOne<Category>().WithMany().HasForeignKey("CategoryId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__UserFavor__Categ__74794A92"),
+                        r => r.HasOne<User>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__UserFavor__UserI__73852659"),
+                        j =>
+                        {
+                            j.HasKey("UserId", "CategoryId").HasName("PK__UserFavo__B6185FEC7F14C88E");
+
+                            j.ToTable("UserFavoriteCategories");
+                        });
             });
 
             modelBuilder.Entity<UserCategory>(entity =>
             {
-                entity.Property(e => e.Description)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
+                entity.Property(e => e.Description).HasMaxLength(255);
             });
 
             OnModelCreatingPartial(modelBuilder);

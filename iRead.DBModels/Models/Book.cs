@@ -16,10 +16,10 @@ namespace iRead.DBModels.Models
         }
 
         public int Id { get; set; }
-        public string Title { get; set; } = null!;
+        public string? Title { get; set; }
         public string Isbn { get; set; } = null!;
         public int PageCount { get; set; }
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
         public string? ImagePath { get; set; }
         public DateTime? PublishDate { get; set; }
 

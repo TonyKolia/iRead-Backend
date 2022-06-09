@@ -21,5 +21,10 @@ namespace iRead.API.Repositories
         {
             return await _db.Categories.FirstOrDefaultAsync(x => x.Id == id);
         }
+
+        public async Task<IEnumerable<Category>> GetMultipleCategories(IEnumerable<int> ids)
+        {
+            return await _db.Categories.Where(x => ids.Contains(x.Id)).ToListAsync();
+        }
     }
 }

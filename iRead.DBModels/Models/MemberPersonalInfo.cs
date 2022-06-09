@@ -7,8 +7,8 @@ namespace iRead.DBModels.Models
     {
         public int UserId { get; set; }
         public string IdNumber { get; set; } = null!;
-        public string Name { get; set; } = null!;
-        public string Surname { get; set; } = null!;
+        public string? Name { get; set; }
+        public string? Surname { get; set; }
         public DateTime? Birthdate { get; set; }
         public int Gender { get; set; }
         public int IdType { get; set; }

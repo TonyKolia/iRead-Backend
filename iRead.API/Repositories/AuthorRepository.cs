@@ -20,5 +20,10 @@ namespace iRead.API.Repositories
         {
             return await _db.Authors.OrderBy(x => x.Name).ToListAsync();
         }
+
+        public async Task<IEnumerable<Author>> GetMultipleAuthors(IEnumerable<int> ids)
+        {
+            return await _db.Authors.Where(x => ids.Contains(x.Id)).ToListAsync();
+        }
     }
 }

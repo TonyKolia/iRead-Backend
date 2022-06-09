@@ -11,7 +11,7 @@ namespace iRead.DBModels.Models
         }
 
         public int Id { get; set; }
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
 
         public virtual ICollection<MemberPersonalInfo> MemberPersonalInfos { get; set; }
     }

@@ -79,6 +79,18 @@ namespace iRead.API.Utilities
             if(!IsEmailValid(form.Email))
                 res.Errors.Add("email", "Μη έγκυρη διεύθυνση email.");
 
+            if (form.FavoriteCategories.Count() == 0)
+                res.Errors.Add("favoriteCategories", "Παρακαλώ επιλέξτε τουλάχιστον μία κατηγορία προτίμησης.");
+
+            if(form.FavoriteCategories.Count() > 3)
+                res.Errors.Add("favoriteCategories", "Οι κατηγορίες προτίμησης δεν μπορούν να είναι περισσότερες από 3.");
+
+            if (form.FavoriteAuthors.Count() == 0)
+                res.Errors.Add("favoriteAuthors", "Παρακαλώ επιλέξτε τουλάχιστον έναν συγγραφέα προτίμησης.");
+
+            if (form.FavoriteAuthors.Count() > 3)
+                res.Errors.Add("favoriteAuthors", "Οι συγγραφείς προτίμησης δεν μπορούν να είναι περισσότεροι από 3.");
+
             if (res.Errors.Count() > 0)
             {
                 res.Success = false;

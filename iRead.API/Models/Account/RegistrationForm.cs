@@ -23,6 +23,10 @@
         public string Telephone { get; set; }
         public string Email { get; set; }
 
+        //favorites
+        public IEnumerable<int> FavoriteCategories { get; set; }
+        public IEnumerable<int> FavoriteAuthors { get; set; }
+
         //terms of service -- just for check
         public bool AcceptTerms { get; set; }
 

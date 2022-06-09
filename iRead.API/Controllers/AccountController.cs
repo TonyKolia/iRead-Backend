@@ -1,5 +1,6 @@
 ﻿using iRead.API.Models;
 using iRead.API.Models.Account;
+using iRead.API.Repositories;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -15,13 +16,18 @@ namespace iRead.API.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IAuthenticationUtilities _authenticationUtilities;
         private readonly IMemberRepository _memberRepository;
+        private readonly IAuthorRepository _authorRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public AccountController(IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
+
+        public AccountController(IAuthorRepository _authorRepository, ICategoryRepository _categoryRepository, IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
         {
             this._validationUtilities = _validationUtilities;
             this._userRepository = _userRepository;
             this._authenticationUtilities = _authenticationUtilities;
             this._memberRepository = _memberRepository;
+            this._authorRepository = _authorRepository;
+            this._categoryRepository = _categoryRepository;
         }
 
         [HttpPost]
@@ -35,7 +41,6 @@ namespace iRead.API.Controllers
                 if (!validationResult.Success)
                     return ReturnResponse(ResponseType.BadRequest, "Errors occured during validation", validationResult);
 
-
                 var salt = string.Empty;
                 var accountData = new User
                 {
@@ -45,7 +50,9 @@ namespace iRead.API.Controllers
                     RegisterDate = DateTime.Now,
                     LastLogin = DateTime.Now,
                     UserCategory = 1,
-                    Active = 1
+                    Active = 1,
+                    Authors = (await _authorRepository.GetMultipleAuthors(data.FavoriteAuthors)) as List<Author>,
+                    Categories = (await _categoryRepository.GetMultipleCategories(data.FavoriteCategories)) as List<Category>
                 };
 
                 var createdUser = await _userRepository.CreateUser(accountData);
