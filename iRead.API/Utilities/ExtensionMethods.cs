@@ -1,4 +1,6 @@
 ﻿using iRead.API.Models;
+using iRead.DBModels.CustomModels;
+using iRead.RecommendationSystem.Models;
 
 namespace iRead.API.Utilities
 {
@@ -74,6 +76,16 @@ namespace iRead.API.Utilities
             }
 
             return booksRanks.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+        }
+    
+        public static IEnumerable<TrainingInput> TransformToTrainingData(this IEnumerable<RecommenderTrainingData> trainData)
+        {
+            var list = new List<TrainingInput>();
+            foreach(var data in trainData)
+            {
+                list.Add(new TrainingInput(Convert.ToUInt16(data.UserId), Convert.ToUInt16(data.BookId), (float)data.Rating));
+            }
+            return list;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using iRead.DBModels.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -342,6 +343,11 @@ namespace iRead.DBModels.Models
             modelBuilder.Entity<UserCategory>(entity =>
             {
                 entity.Property(e => e.Description).HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<RecommenderTrainingData>(entity =>
+            {
+                entity.HasKey(nameof(RecommenderTrainingData.UserId), nameof(RecommenderTrainingData.BookId), nameof(RecommenderTrainingData.Rating));
             });
 
             OnModelCreatingPartial(modelBuilder);

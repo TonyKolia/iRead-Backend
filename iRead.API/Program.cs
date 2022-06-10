@@ -3,12 +3,15 @@ using iRead.API.Repositories;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities;
 using iRead.API.Utilities.Interfaces;
+using iRead.RecommendationSystem;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.ML;
+using iRead.RecommendationSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builder => builder.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000")));
+builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builderCORS => builderCORS.AllowAnyMethod().AllowAnyHeader().WithOrigins(builder.Configuration.GetSection("ClientUrl").Value)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -29,6 +32,10 @@ builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();
 builder.Services.AddScoped<IAuthenticationUtilities, AuthenticationUtilities>();
+builder.Services.AddScoped<IRecommendationUtilities, RecommendationUtilities>();
+
+builder.Services.AddScoped<Recommender>();
+builder.Services.AddPredictionEnginePool<RecommendationInput, RecommendationOutput>().FromFile(builder.Configuration.GetSection("RecommendationModelPath").Value, true);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
     options.TokenValidationParameters = new TokenValidationParameters
