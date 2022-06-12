@@ -52,5 +52,15 @@ namespace iRead.API.Repositories
                 return null;
             }
         }
+
+        public async Task<IEnumerable<int>> GetFavoriteCategories(int id)
+        {
+            return await _db.Users.Where(x => x.Id == id).Select(x => x.Categories.Select(c => c.Id).AsEnumerable()).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<int>> GetFavoriteAuthors(int id)
+        {
+            return await _db.Users.Where(x => x.Id == id).Select(x => x.Authors.Select(c => c.Id).AsEnumerable()).FirstOrDefaultAsync();
+        }
     }
 }

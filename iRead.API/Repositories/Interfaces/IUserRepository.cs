@@ -8,6 +8,7 @@
         Task<User> UpdateUser(User user);
         Task<bool> UserExists(int id);
         Task<bool> UserExists(string username);
-
+        Task<IEnumerable<int>> GetFavoriteCategories(int id);
+        Task<IEnumerable<int>> GetFavoriteAuthors(int id);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using iRead.API.Models.Recommendation;
+using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities.Interfaces;
 using iRead.RecommendationSystem;
 using iRead.RecommendationSystem.Models;
@@ -11,12 +12,14 @@ namespace iRead.API.Utilities
         private readonly Recommender _recommender;
         private readonly iReadDBContext _db;
         private readonly PredictionEnginePool<RecommendationInput, RecommendationOutput> _predictionEngine;
+        private readonly IUserRepository _userRepository;
 
-        public RecommendationUtilities(PredictionEnginePool<RecommendationInput, RecommendationOutput> _predictionEngine, Recommender _recommender, iReadDBContext _db)
+        public RecommendationUtilities(IUserRepository _userRepository, PredictionEnginePool<RecommendationInput, RecommendationOutput> _predictionEngine, Recommender _recommender, iReadDBContext _db)
         {
             this._recommender = _recommender;
             this._db = _db;
             this._predictionEngine = _predictionEngine;
+            this._userRepository = _userRepository;
         }
 
         public async Task<string> MakePrediction(RecommendationInput input)
@@ -27,7 +30,7 @@ namespace iRead.API.Utilities
 
         public async Task<IEnumerable<RecommendedBook>> GetRecommendedBooks(int userId)
         {
-            var predictions = _db.Books.AsEnumerable().Select(book => 
+            var predictions = _db.Books.Where(book => !book.Orders.Any(order => order.UserId == userId && order.Books.Contains(book))).AsEnumerable().Select(book => 
             {
                 var prediction = _predictionEngine.Predict(new RecommendationInput(Convert.ToUInt16(userId), Convert.ToUInt16(book.Id)));
                 if (!float.IsNaN(prediction.Rating))
@@ -39,11 +42,36 @@ namespace iRead.API.Utilities
             return predictions.Where(x => x.PredictedRating > 0).OrderByDescending(x => x.PredictedRating);
         }
 
+        public async Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, int maxBooksNeeded = 6)
+        {
+            var userFavoriteCategories = await _userRepository.GetFavoriteCategories(userId);
+            //var userFavoriteAuthors = user.Authors.Select(x => x.Id).ToList();
+
+            var booksPerCategory = 6 / userFavoriteCategories.Count();
+
+            var recommendedBooks = new List<int>();
+            foreach(var category in userFavoriteCategories)
+            {
+                if (recommendedBooks.Count >= maxBooksNeeded)
+                    break;
+
+                var books = _db.Books.Where(x => x.Categories.Any(c => c.Id == category) && !x.Orders.Any(order => order.UserId == userId && order.Books.Contains(x))).Take(booksPerCategory).AsEnumerable();
+                recommendedBooks.AddRange(books.Select(x => x.Id));
+            }
+
+            if (maxBooksNeeded > recommendedBooks.Count)
+                recommendedBooks = recommendedBooks.Take(maxBooksNeeded).ToList();
+
+            return recommendedBooks;
+        }
+
         public async Task TrainModel()
         {
             var trainingData = _db.GetRecommenderTrainingData().AsEnumerable().TransformToTrainingData();
             _recommender.SetTrainingData(trainingData);
             _recommender.TrainModel();
         }
+
+
     }
 }

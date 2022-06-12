@@ -1,4 +1,5 @@
 ﻿using iRead.API.Models;
+using iRead.API.Models.Books;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities;
 using Microsoft.AspNetCore.Http;
@@ -72,38 +73,14 @@ namespace iRead.API.Controllers
             return ReturnIfNotEmpty(books, "No books found for these filters.", false);
         }
 
-        [HttpGet]
-        [Route("Category/{category}/Authors/{authors}/Publishers/{publishers}/MinYear/{minYear}/MaxYear/{maxYear}/SearchString/{searchString}/Type/{type}")]
-        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters(string category, string authors, string publishers, string minYear, string maxYear, string searchString, string type)
+        [HttpPost]
+        [Route("GetByFilters")]
+        public async Task<ActionResult<IEnumerable<BookResponse>>> GetBooksByFilters([FromBody] BookFilters filters)
         {
             try
             {
-                int? categoryId = null;
-                int? minYearValue = null;
-                int? maxYearValue = null;
-                var authorList = new List<int>();
-                var publisherList = new List<int>();
-                var searchItems = new List<string>();
-
-                if (!string.IsNullOrEmpty(category) && category != "ALL")
-                    categoryId = int.Parse(category);
-
-                if (!string.IsNullOrEmpty(authors) && authors != "ALL")
-                    authorList = authors.Split('-').ContertToInteger().ToList();
-
-                if (!string.IsNullOrEmpty(publishers) && publishers != "ALL")
-                    publisherList = publishers.Split('-').ContertToInteger().ToList();
-
-                if (!string.IsNullOrEmpty(minYear) && minYear != "ALL")
-                    minYearValue = int.Parse(minYear);
-
-                if (!string.IsNullOrEmpty(maxYear) && maxYear != "ALL")
-                    maxYearValue = int.Parse(maxYear);
-
-                if (!string.IsNullOrEmpty(searchString) && searchString != "%%%")
-                    searchItems = searchString.Split(' ').ToList();
-
-                var books = await _bookRepository.GetBooksByFilters(authorList, publisherList, minYearValue, maxYearValue, categoryId, searchItems, type);
+                var searchItems = !string.IsNullOrEmpty(filters.SearchString) ? filters.SearchString.Split(' ').ToList() : new List<string>(); 
+                var books = await _bookRepository.GetBooksByFilters(filters.Authors, filters.Publishers, filters.MinYear, filters.MaxYear, filters.CategoryId, searchItems, filters.Type, filters.UserId);
                 return ReturnIfNotEmpty(books, "No books found for these filters.", false);
             }
             catch(Exception ex)

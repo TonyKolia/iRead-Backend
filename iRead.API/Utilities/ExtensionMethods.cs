@@ -1,4 +1,5 @@
 ﻿using iRead.API.Models;
+using iRead.API.Models.Recommendation;
 using iRead.DBModels.CustomModels;
 using iRead.RecommendationSystem.Models;
 
@@ -76,6 +77,55 @@ namespace iRead.API.Utilities
             }
 
             return booksRanks.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+        }
+
+        //Order the returned books in the main page using the following "ranking" 
+        //1. Books recommended from the recommendation engine
+        //2. Books written by a favorite author in a favorite category
+        //3. Books in a favorite category
+        //4. The rest of the books
+        public static List<BookResponse> OrderFoundBooksBasedOnRecommendations(this List<BookResponse> books, IEnumerable<RecommendedBook> recommendedBooks, IEnumerable<int> favoriteCategories, IEnumerable<int> favoriteAuthors)
+        {
+            if (recommendedBooks.Count() == 0 || books.Count == 0)
+                return books;
+
+            //this list contains the 4 above mentions ranking "partitions"
+            var booksParts = new List<IEnumerable<BookResponse>>();
+
+            //partition 1. Books recommended from the recommendation engine
+            booksParts.Add(books.Where(x => recommendedBooks.Select(r => r.BookId).Contains(x.Id)));
+
+            var booksNotInRecommended = books.Where(x => !recommendedBooks.Select(r => r.BookId).Contains(x.Id));
+            var recommendedByCategory = new List<BookResponse>();
+            var recommendedByCategoryAndAuthor = new List<BookResponse>();
+            foreach (var favCategory in favoriteCategories)
+            {
+                recommendedByCategory.AddRange(booksNotInRecommended.Where(x => x.Categories.Select(c => c.Id).Contains(favCategory)));
+                foreach (var favAuthor in favoriteAuthors)
+                {
+                    //Partition 2. Books written by a favorite author in a favorite category
+                    recommendedByCategoryAndAuthor.AddRange(recommendedByCategory.Where(x => x.Authors.Select(a => a.Id).Contains(favAuthor)));
+                }
+            }
+
+            //partition 3.Books in a favorite category
+            //we remove the books in partition 2 from partition 3 to avoid duplicates
+            if (recommendedByCategoryAndAuthor.Count > 0)
+                recommendedByCategory.RemoveAll(x => recommendedByCategoryAndAuthor.Contains(x));
+
+            booksParts.Add(recommendedByCategoryAndAuthor);
+            booksParts.Add(recommendedByCategory);
+
+            //partition 4. The rest of the books
+            //remove any books not recommended in any way to avoid duplicates
+            booksParts.Add(booksNotInRecommended.Where(x => !recommendedByCategory.Contains(x)));
+
+            //add all the partitions in a new list in the correct order which will be the displaying order
+            var orderedBooks = new List<BookResponse>();
+            foreach (var booksPart in booksParts)
+                orderedBooks.AddRange(booksPart);
+
+            return orderedBooks;
         }
     
         public static IEnumerable<TrainingInput> TransformToTrainingData(this IEnumerable<RecommenderTrainingData> trainData)

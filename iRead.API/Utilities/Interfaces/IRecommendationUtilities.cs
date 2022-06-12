@@ -8,5 +8,7 @@ namespace iRead.API.Utilities.Interfaces
         public Task TrainModel();
         public Task<string> MakePrediction(RecommendationInput input);
         public Task<IEnumerable<RecommendedBook>> GetRecommendedBooks(int userId);
+
+        public Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, int maxBooksNeeded = 6);
     }
 }
