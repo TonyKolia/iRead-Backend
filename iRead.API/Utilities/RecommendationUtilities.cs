@@ -42,24 +42,45 @@ namespace iRead.API.Utilities
             return predictions.Where(x => x.PredictedRating > 0).OrderByDescending(x => x.PredictedRating);
         }
 
-        public async Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, int maxBooksNeeded = 6)
+        public async Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, IEnumerable<int> recommendedByEngine, int maxBooksNeeded = 6)
         {
             var userFavoriteCategories = await _userRepository.GetFavoriteCategories(userId);
-            //var userFavoriteAuthors = user.Authors.Select(x => x.Id).ToList();
-
-            var booksPerCategory = 6 / userFavoriteCategories.Count();
-
+            var userFavoriteAuthors = await _userRepository.GetFavoriteAuthors(userId);
             var recommendedBooks = new List<int>();
-            foreach(var category in userFavoriteCategories)
-            {
-                if (recommendedBooks.Count >= maxBooksNeeded)
-                    break;
 
-                var books = _db.Books.Where(x => x.Categories.Any(c => c.Id == category) && !x.Orders.Any(order => order.UserId == userId && order.Books.Contains(x))).Take(booksPerCategory).AsEnumerable();
-                recommendedBooks.AddRange(books.Select(x => x.Id));
+            //exclude books already read
+            var books = _db.Books.Where(x => !x.Orders.Any(order => order.UserId == userId && order.Books.Contains(x))).AsQueryable();
+
+            //exclude books already recommended by the engine
+            if (recommendedByEngine.Count() > 0)
+                books = books.Where(x => !recommendedByEngine.Contains(x.Id));
+
+            //get books recommended by both (combined) favorite criteria
+            var recommendedByCategoryAndAuthor = books.Where(x => x.Categories.Any(c => userFavoriteCategories.Contains(c.Id)) && x.Authors.Any(a => userFavoriteAuthors.Contains(a.Id))).Select(x => x.Id).AsEnumerable();
+
+            //if we find more than enough, return them
+            if (recommendedByCategoryAndAuthor.Count() >= maxBooksNeeded)
+                return recommendedByCategoryAndAuthor.Take(maxBooksNeeded);
+
+            //if any found, exclude them from the next search to avoid duplicates
+            if (recommendedByCategoryAndAuthor.Count() > 0)
+            {
+                recommendedBooks.AddRange(recommendedByCategoryAndAuthor);
+                books = books.Where(x => !recommendedByCategoryAndAuthor.Contains(x.Id));
+            }
+                
+            var booksPerCategory = 6 / userFavoriteCategories.Count();
+            var categoryBooks = new List<int>();
+            //randomly order books using a guid
+            foreach (var category in userFavoriteCategories)
+            {
+                categoryBooks.AddRange(books.Where(x => x.Categories.Any(x => x.Id == category)).Select(x => new { Guid = Guid.NewGuid().ToString(), x.Id }).OrderBy(x => x.Guid).Select(x => x.Id).Take(booksPerCategory).AsEnumerable());
             }
 
-            if (maxBooksNeeded > recommendedBooks.Count)
+            //randomly add the remaining recommended by category books
+            recommendedBooks.AddRange(categoryBooks.RandomlyOrderList().Take(maxBooksNeeded - recommendedBooks.Count));
+
+            if (recommendedBooks.Count > maxBooksNeeded)
                 recommendedBooks = recommendedBooks.Take(maxBooksNeeded).ToList();
 
             return recommendedBooks;

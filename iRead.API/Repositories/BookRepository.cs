@@ -239,7 +239,7 @@ namespace iRead.API.Repositories
                         else
                         {
                             var booksNeeded = pageSize - recommendedBooks.Count;
-                            var recommendedByFavorites = await _recommendationUtilities.GetRecommendedBooksBasedOnFavorites(userId.Value, booksNeeded);
+                            var recommendedByFavorites = await _recommendationUtilities.GetRecommendedBooksBasedOnFavorites(userId.Value, recommendedBooks.Select(x => x.BookId), booksNeeded);
                             if (recommendedBooks.Count == 0)
                                 books = books.Where(x => recommendedByFavorites.Contains(x.Id));
                             else
@@ -248,7 +248,7 @@ namespace iRead.API.Repositories
                     }
                     else
                     {
-                        books = books.OrderByDescending(x => x.Orders.Count());
+                        books = books.Select(x => new { Guid = Guid.NewGuid().ToString(), Book = x }).OrderBy(x => x.Guid).Select(x => x.Book);
                     }
                     break;
 
@@ -310,15 +310,15 @@ namespace iRead.API.Repositories
             return books;
         }
 
-        private async Task<List<BookResponse>> OrderMainRecommendedBooks(List<BookResponse> books, int? userId)
+        private async Task<List<BookResponse>> OrderMainRecommendedBooks(List<BookResponse> books, int? userId, bool fromSearch = false)
         {
             if (!userId.HasValue)
-                return books;
+                return books.RandomlyOrderList().ToList();
 
             var recommendedBooks = (await _recommendationUtilities.GetRecommendedBooks(userId.Value)).ToList();
             var userFavoriteCategories = await _userRepository.GetFavoriteCategories(userId.Value);
             var userFavoriteAuthors = await _userRepository.GetFavoriteAuthors(userId.Value);
-            return books.OrderFoundBooksBasedOnRecommendations(recommendedBooks, userFavoriteCategories, userFavoriteAuthors);
+            return books.OrderFoundBooksBasedOnRecommendations(recommendedBooks, userFavoriteCategories, userFavoriteAuthors, fromSearch);
         }
 
         public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int>? authors, IEnumerable<int>? publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems, string type, int? userId)
@@ -370,7 +370,7 @@ namespace iRead.API.Repositories
                 foundBooks = foundBooks.OrderFoundBooks(searchItems);
 
             if (!forHome && (type == "recommended" || type == ""))
-                foundBooks = await OrderMainRecommendedBooks(foundBooks, userId);
+                foundBooks = await OrderMainRecommendedBooks(foundBooks, userId, searchItems.Count() > 0);
 
             return foundBooks;
         }

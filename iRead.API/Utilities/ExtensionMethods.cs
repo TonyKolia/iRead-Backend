@@ -2,6 +2,10 @@
 using iRead.API.Models.Recommendation;
 using iRead.DBModels.CustomModels;
 using iRead.RecommendationSystem.Models;
+using System;
+using System.Globalization;
+using System.Text;
+using System.Web;
 
 namespace iRead.API.Utilities
 {
@@ -63,13 +67,13 @@ namespace iRead.API.Utilities
 
             var booksRanks = new Dictionary<BookResponse, int>();
 
-
             foreach (var book in books)
             {
                 var score = 0;
+
                 foreach (var item in searchItems)
                 {
-                    if (book.Title.Contains(item))
+                    if (book.Title.ToLower().RemoveDiacritics().Contains(item.ToLower().RemoveDiacritics()))
                         score++;
                 }
 
@@ -79,12 +83,35 @@ namespace iRead.API.Utilities
             return booksRanks.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
         }
 
+        public static string RemoveDiacritics(this string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString.EnumerateRunes())
+            {
+                var unicodeCategory = Rune.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        //randomly order a list using guid
+        public static IEnumerable<T> RandomlyOrderList<T>(this IEnumerable<T> list)
+        {
+            return list.Select(x => new { Guid = Guid.NewGuid().ToString(), Item = x }).OrderBy(x => x.Guid).Select(x => x.Item);
+        }
+
         //Order the returned books in the main page using the following "ranking" 
         //1. Books recommended from the recommendation engine
         //2. Books written by a favorite author in a favorite category
         //3. Books in a favorite category
         //4. The rest of the books
-        public static List<BookResponse> OrderFoundBooksBasedOnRecommendations(this List<BookResponse> books, IEnumerable<RecommendedBook> recommendedBooks, IEnumerable<int> favoriteCategories, IEnumerable<int> favoriteAuthors)
+        public static List<BookResponse> OrderFoundBooksBasedOnRecommendations(this List<BookResponse> books, IEnumerable<RecommendedBook> recommendedBooks, IEnumerable<int> favoriteCategories, IEnumerable<int> favoriteAuthors, bool fromSearch = false)
         {
             if (recommendedBooks.Count() == 0 || books.Count == 0)
                 return books;
@@ -113,12 +140,23 @@ namespace iRead.API.Utilities
             if (recommendedByCategoryAndAuthor.Count > 0)
                 recommendedByCategory.RemoveAll(x => recommendedByCategoryAndAuthor.Contains(x));
 
-            booksParts.Add(recommendedByCategoryAndAuthor);
+            //random ordering for results if not from search
+            //if from search, a search string match "sub ordering" must exist inside each part as it is already ordered like this
+            if (!fromSearch)
+            {
+                recommendedByCategoryAndAuthor = recommendedByCategoryAndAuthor.RandomlyOrderList().ToList();
+                recommendedByCategory = recommendedByCategory.RandomlyOrderList().ToList();
+            }
+                
+            booksParts.Add(recommendedByCategoryAndAuthor);                
             booksParts.Add(recommendedByCategory);
 
             //partition 4. The rest of the books
             //remove any books not recommended in any way to avoid duplicates
-            booksParts.Add(booksNotInRecommended.Where(x => !recommendedByCategory.Contains(x)));
+            var notRecommended = booksNotInRecommended.Where(x => !recommendedByCategory.Contains(x) && !recommendedByCategoryAndAuthor.Contains(x));
+            if (!fromSearch)
+                notRecommended = notRecommended.RandomlyOrderList();
+            booksParts.Add(notRecommended);
 
             //add all the partitions in a new list in the correct order which will be the displaying order
             var orderedBooks = new List<BookResponse>();
