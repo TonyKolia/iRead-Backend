@@ -10,5 +10,6 @@
         Task<bool> UserExists(string username);
         Task<IEnumerable<int>> GetFavoriteCategories(int id);
         Task<IEnumerable<int>> GetFavoriteAuthors(int id);
+        Task<IEnumerable<User>> GetUsersByFavoriteCategory(int categoryId);
     }
 }

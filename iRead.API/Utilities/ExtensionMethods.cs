@@ -106,6 +106,11 @@ namespace iRead.API.Utilities
             return list.Select(x => new { Guid = Guid.NewGuid().ToString(), Item = x }).OrderBy(x => x.Guid).Select(x => x.Item);
         }
 
+        public static IQueryable<T> OrderRandomly<T>(this IQueryable<T> query)
+        {
+            return query.Select(x => new { Guid = Guid.NewGuid().ToString(), Item = x }).OrderBy(x => x.Guid).Select(x => x.Item);
+        }
+
         //Order the returned books in the main page using the following "ranking" 
         //1. Books recommended from the recommendation engine
         //2. Books written by a favorite author in a favorite category

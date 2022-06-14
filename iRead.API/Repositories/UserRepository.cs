@@ -62,5 +62,10 @@ namespace iRead.API.Repositories
         {
             return await _db.Users.Where(x => x.Id == id).Select(x => x.Authors.Select(c => c.Id).AsEnumerable()).FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<User>> GetUsersByFavoriteCategory(int categoryId)
+        {
+            return await _db.Users.Where(x => x.Categories.Any(c => c.Id == categoryId)).ToListAsync();
+        }
     }
 }

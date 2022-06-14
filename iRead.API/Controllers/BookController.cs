@@ -1,7 +1,9 @@
 ﻿using iRead.API.Models;
 using iRead.API.Models.Books;
+using iRead.API.Models.Recommendation;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -88,7 +90,29 @@ namespace iRead.API.Controllers
                 _logger.LogError(ex.Message);
                 return ReturnResponse(ResponseType.Error);
             }
+        }
 
+        [HttpGet]
+        [Route("GetRecommendationsByBookAndUser/{bookId}/{userId}")]
+        public async Task<ActionResult<RelatedBookRecommendations>> GetByBookAndUser(int bookId, int userId)
+        {
+            try
+            {
+                var books = await _bookRepository.GetRecommendedByUserAndBook(bookId, userId);
+                return ReturnIfNotEmpty(books, "No recommended books found", false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetRecommendationsByBook/{bookId}/{userId}")]
+        public async Task<ActionResult<RelatedBookRecommendations>> GetByBook(int bookId)
+        {
+            return Ok();
         }
     }
 }

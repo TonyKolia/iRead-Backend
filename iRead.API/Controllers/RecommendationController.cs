@@ -2,6 +2,8 @@
 using iRead.API.Utilities.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using iRead.API.Models.Recommendation;
+using Microsoft.AspNetCore.Authorization;
 
 namespace iRead.API.Controllers
 {
@@ -31,6 +33,9 @@ namespace iRead.API.Controllers
             }
         }
 
+       
+
+        #region Testing
 
         [HttpPost]
         [Route("Predict")]
@@ -61,5 +66,9 @@ namespace iRead.API.Controllers
                 return Ok(ex.Message);
             }
         }
+
+        #endregion
+
+       
     }
 }

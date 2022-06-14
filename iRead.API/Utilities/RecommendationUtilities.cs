@@ -4,6 +4,8 @@ using iRead.API.Utilities.Interfaces;
 using iRead.RecommendationSystem;
 using iRead.RecommendationSystem.Models;
 using Microsoft.Extensions.ML;
+using System.Linq;
+using System;
 
 namespace iRead.API.Utilities
 {
@@ -42,7 +44,7 @@ namespace iRead.API.Utilities
             return predictions.Where(x => x.PredictedRating > 0).OrderByDescending(x => x.PredictedRating);
         }
 
-        public async Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, IEnumerable<int> recommendedByEngine, int maxBooksNeeded = 6)
+        public async Task<IEnumerable<int>> GetRecommendedBooksBasedOnFavorites(int userId, IEnumerable<int> recommendedByEngine, int maxBooksNeeded = 6, IEnumerable<int> excludedIds = null)
         {
             var userFavoriteCategories = await _userRepository.GetFavoriteCategories(userId);
             var userFavoriteAuthors = await _userRepository.GetFavoriteAuthors(userId);
@@ -57,6 +59,8 @@ namespace iRead.API.Utilities
 
             //get books recommended by both (combined) favorite criteria
             var recommendedByCategoryAndAuthor = books.Where(x => x.Categories.Any(c => userFavoriteCategories.Contains(c.Id)) && x.Authors.Any(a => userFavoriteAuthors.Contains(a.Id))).Select(x => x.Id).AsEnumerable();
+            if (excludedIds != null && excludedIds.Count() > 0)
+                recommendedByCategoryAndAuthor = recommendedByCategoryAndAuthor.Where(x => !excludedIds.Contains(x));
 
             //if we find more than enough, return them
             if (recommendedByCategoryAndAuthor.Count() >= maxBooksNeeded)
@@ -74,7 +78,10 @@ namespace iRead.API.Utilities
             //randomly order books using a guid
             foreach (var category in userFavoriteCategories)
             {
-                categoryBooks.AddRange(books.Where(x => x.Categories.Any(x => x.Id == category)).Select(x => new { Guid = Guid.NewGuid().ToString(), x.Id }).OrderBy(x => x.Guid).Select(x => x.Id).Take(booksPerCategory).AsEnumerable());
+                if(excludedIds != null && excludedIds.Count() > 0)
+                    categoryBooks.AddRange(books.Where(x => x.Categories.Any(x => x.Id == category) && !excludedIds.Contains(x.Id)).Select(x => new { Guid = Guid.NewGuid().ToString(), x.Id }).OrderBy(x => x.Guid).Select(x => x.Id).Take(booksPerCategory).AsEnumerable());
+                else
+                    categoryBooks.AddRange(books.Where(x => x.Categories.Any(x => x.Id == category)).Select(x => new { Guid = Guid.NewGuid().ToString(), x.Id }).OrderBy(x => x.Guid).Select(x => x.Id).Take(booksPerCategory).AsEnumerable());
             }
 
             //randomly add the remaining recommended by category books

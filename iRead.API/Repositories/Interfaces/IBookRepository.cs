@@ -1,4 +1,5 @@
 ﻿using iRead.API.Models;
+using iRead.API.Models.Recommendation;
 
 namespace iRead.API.Repositories.Interfaces
 {
@@ -11,6 +12,7 @@ namespace iRead.API.Repositories.Interfaces
         Task<IEnumerable<BookResponse>> GetBooksByAuthors(IEnumerable<int> authors);
         Task<IEnumerable<BookResponse>> GetBooksByPublishers(IEnumerable<int> publishers);
         Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids);
+        Task<RelatedBookRecommendations> GetRecommendedByUserAndBook(int bookId, int userId);
         Task UpdateBookStock(IEnumerable<int> books);
         Task<int> GetBookStock(int bookId);
         Task<int> GetMinPublishYear();

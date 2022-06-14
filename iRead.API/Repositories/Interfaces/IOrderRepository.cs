@@ -8,5 +8,6 @@ namespace iRead.API.Repositories.Interfaces
         Task<string> CreateOrder(NewOrder newOrder);
         Task<OrderResponse> GetOrder(int id);
         Task<IEnumerable<OrderResponse>> GetUserOrders(int userId);
+        Task<IEnumerable<OrderResponse>> GetUsersOrders(IEnumerable<int> userIds);
     }
 }
