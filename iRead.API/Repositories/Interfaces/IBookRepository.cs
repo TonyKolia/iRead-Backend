@@ -13,6 +13,7 @@ namespace iRead.API.Repositories.Interfaces
         Task<IEnumerable<BookResponse>> GetBooksByPublishers(IEnumerable<int> publishers);
         Task<IEnumerable<BookResponse>> GetBooksByIds(IEnumerable<int> ids);
         Task<RelatedBookRecommendations> GetRecommendedByUserAndBook(int bookId, int userId);
+        Task<RelatedBookRecommendations> GetRecommendedByBook(int bookId);
         Task UpdateBookStock(IEnumerable<int> books);
         Task<int> GetBookStock(int bookId);
         Task<int> GetMinPublishYear();

@@ -93,6 +93,7 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("GetRecommendationsByBookAndUser/{bookId}/{userId}")]
         public async Task<ActionResult<RelatedBookRecommendations>> GetByBookAndUser(int bookId, int userId)
         {
@@ -109,10 +110,19 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
-        [Route("GetRecommendationsByBook/{bookId}/{userId}")]
+        [Route("GetRecommendationsByBook/{bookId}")]
         public async Task<ActionResult<RelatedBookRecommendations>> GetByBook(int bookId)
         {
-            return Ok();
+            try
+            {
+                var books = await _bookRepository.GetRecommendedByBook(bookId);
+                return ReturnIfNotEmpty(books, "No recommended books found", false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
         }
     }
 }
