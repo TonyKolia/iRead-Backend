@@ -10,6 +10,7 @@ namespace iRead.DBModels.Models
             Favorites = new HashSet<Favorite>();
             Orders = new HashSet<Order>();
             Ratings = new HashSet<Rating>();
+            UserNotifications = new HashSet<UserNotification>();
             Authors = new HashSet<Author>();
             Categories = new HashSet<Category>();
         }
@@ -29,6 +30,7 @@ namespace iRead.DBModels.Models
         public virtual ICollection<Favorite> Favorites { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<UserNotification> UserNotifications { get; set; }
 
         public virtual ICollection<Author> Authors { get; set; }
         public virtual ICollection<Category> Categories { get; set; }

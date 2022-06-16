@@ -32,6 +32,7 @@ namespace iRead.DBModels.Models
         public virtual DbSet<Rating> Ratings { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserCategory> UserCategories { get; set; } = null!;
+        public virtual DbSet<UserNotification> UserNotifications { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -343,6 +344,14 @@ namespace iRead.DBModels.Models
             modelBuilder.Entity<UserCategory>(entity =>
             {
                 entity.Property(e => e.Description).HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<UserNotification>(entity =>
+            {
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserNotifications)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK__UserNotif__UserI__1B9317B3");
             });
 
             modelBuilder.Entity<RecommenderTrainingData>(entity =>

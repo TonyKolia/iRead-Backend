@@ -150,4 +150,13 @@
         public int UserId { get; set; }
     }
 
+    public class UserNotificationResponse
+    {
+        public int Id { get; set; }
+        public string NotificationText { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int Viewed { get; set; }
+    }
+
+
 }
