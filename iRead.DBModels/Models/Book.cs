@@ -22,6 +22,7 @@ namespace iRead.DBModels.Models
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
         public DateTime? PublishDate { get; set; }
+        public DateTime DateAdded { get; set; }
 
         public virtual BooksStock BooksStock { get; set; } = null!;
         public virtual ICollection<Favorite> Favorites { get; set; }

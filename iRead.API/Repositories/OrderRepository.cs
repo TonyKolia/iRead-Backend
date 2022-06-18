@@ -75,6 +75,46 @@ namespace iRead.API.Repositories
 
         }
 
+        public async Task<IEnumerable<OrderResponse>> GetUserActiveOrders(int userId)
+        {
+            var orders = await _db.Orders.Where(x => x.UserId == userId && x.StatusNavigation.Id == 1).Select(x => new OrderResponse
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                OrderDate = x.OrderDate,
+                ReturnDate = x.ReturnDate,
+                Status = x.StatusNavigation.Description ?? "",
+                Books = x.Books.Select(b => new BookResponse
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    ISBN = b.Isbn,
+                    PageCount = b.PageCount,
+                    Description = b.Description,
+                    ImagePath = b.ImagePath ?? "",
+                    Authors = b.Authors.Select(a => new AuthorResponse
+                    {
+                        Id = a.Id,
+                        Name = a.Name,
+                        Surname = a.Surname,
+                        Birthdate = a.Birthdate
+                    }),
+                    Categories = b.Categories.Select(c => new CategoryResponse
+                    {
+                        Id = c.Id,
+                        Description = c.Description ?? ""
+                    }),
+                    Ratings = b.Ratings.Select(r => new RatingResponse
+                    {
+                        Rating = r.Rating1,
+                        Comment = r.Comment ?? ""
+                    })
+                })
+            }).ToListAsync();
+
+            return orders;
+        }
+
         public async Task<IEnumerable<OrderResponse>> GetUserOrders(int userId)
         {
             var orders = await _db.Orders.Where(x => x.UserId == userId).Select(x => new OrderResponse

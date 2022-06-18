@@ -254,7 +254,7 @@ namespace iRead.API.Repositories
                     break;
 
                 case "new":
-                    books = books.OrderByDescending(x => x.PublishDate);
+                    books = books.OrderByDescending(x => x.DateAdded);
                     break;
                 case "hot":
                     books = books.OrderByDescending(x => x.Orders.Count());
@@ -298,7 +298,7 @@ namespace iRead.API.Repositories
             switch (type)
             {
                 case "new":
-                    books = books.OrderByDescending(x => x.PublishDate);
+                    books = books.OrderByDescending(x => x.DateAdded);
                     break;
                 case "hot":
                     books = books.OrderByDescending(x => x.Orders.Count());
@@ -625,6 +625,22 @@ namespace iRead.API.Repositories
             idsToExclude.AddRange(otherUsersRecommendations.Select(x => x.Id));
             var similarRecommendations = await GetSimilarBooks(bookId, pageSize, idsToExclude);
             return new RelatedBookRecommendations(userRecommendations, otherUsersRecommendations, similarRecommendations);
+        }
+
+        public async Task<IEnumerable<BookResponse>> GetNewBooksForUserFavoriteCategories(int userId)
+        {
+            var userLastLogin = (await _userRepository.GetUser(userId)).LastLogin;
+            var favoriteCategories = await _userRepository.GetFavoriteCategories(userId);
+            var query = _db.Books.Where(x => x.DateAdded > userLastLogin && x.Categories.Any(c => favoriteCategories.Contains(c.Id)));
+            return await GetBookResults(query);
+        }
+
+        public async Task<IEnumerable<BookResponse>> GetNewBooksForUserFavoriteAuthors(int userId)
+        {
+            var userLastLogin = (await _userRepository.GetUser(userId)).LastLogin;
+            var favoriteAuthors = await _userRepository.GetFavoriteAuthors(userId);
+            var query = _db.Books.Where(x => x.DateAdded > userLastLogin && x.Authors.Any(c => favoriteAuthors.Contains(c.Id)));
+            return await GetBookResults(query);
         }
     }
 }

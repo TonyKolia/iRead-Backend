@@ -26,6 +26,7 @@ namespace iRead.DBModels.Models
         public virtual DbSet<IdentificationMethod> IdentificationMethods { get; set; } = null!;
         public virtual DbSet<MemberContactInfo> MemberContactInfos { get; set; } = null!;
         public virtual DbSet<MemberPersonalInfo> MemberPersonalInfos { get; set; } = null!;
+        public virtual DbSet<NotificationText> NotificationTexts { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderStatus> OrderStatuses { get; set; } = null!;
         public virtual DbSet<Publisher> Publishers { get; set; } = null!;
@@ -52,6 +53,8 @@ namespace iRead.DBModels.Models
 
             modelBuilder.Entity<Book>(entity =>
             {
+                entity.Property(e => e.DateAdded).HasDefaultValueSql("(getdate())");
+
                 entity.Property(e => e.ImagePath).HasMaxLength(500);
 
                 entity.Property(e => e.Isbn)
@@ -226,6 +229,13 @@ namespace iRead.DBModels.Models
                     .HasConstraintName("FK__MemberPer__UserI__3C69FB99");
             });
 
+            modelBuilder.Entity<NotificationText>(entity =>
+            {
+                entity.ToTable("NotificationText");
+
+                entity.Property(e => e.NotificationText1).HasColumnName("NotificationText");
+            });
+
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.Property(e => e.OrderDate).HasColumnType("datetime");
@@ -353,6 +363,7 @@ namespace iRead.DBModels.Models
                     .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK__UserNotif__UserI__1B9317B3");
             });
+
 
             modelBuilder.Entity<RecommenderTrainingData>(entity =>
             {

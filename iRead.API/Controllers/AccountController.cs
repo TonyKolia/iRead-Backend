@@ -18,9 +18,10 @@ namespace iRead.API.Controllers
         private readonly IMemberRepository _memberRepository;
         private readonly IAuthorRepository _authorRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly INotificationRepository _notificationRepository;
 
 
-        public AccountController(IAuthorRepository _authorRepository, ICategoryRepository _categoryRepository, IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
+        public AccountController(INotificationRepository _notificationRepository, IAuthorRepository _authorRepository, ICategoryRepository _categoryRepository, IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
         {
             this._validationUtilities = _validationUtilities;
             this._userRepository = _userRepository;
@@ -28,6 +29,7 @@ namespace iRead.API.Controllers
             this._memberRepository = _memberRepository;
             this._authorRepository = _authorRepository;
             this._categoryRepository = _categoryRepository;
+            this._notificationRepository = _notificationRepository;
         }
 
         [HttpPost]
@@ -91,18 +93,32 @@ namespace iRead.API.Controllers
         [Route("Login")]
         public async Task<ActionResult> Login([FromBody] LoginForm form)
         {
-            if (form == null || !_validationUtilities.IsObjectCompletelyPopulated(form))
-                return ReturnResponse(ResponseType.BadRequest, "Παρακαλώ συμπληρώστε όλα τα πεδία");
+            try
+            {
+                if (form == null || !_validationUtilities.IsObjectCompletelyPopulated(form))
+                    return ReturnResponse(ResponseType.BadRequest, "Παρακαλώ συμπληρώστε όλα τα πεδία");
 
-            if (!await _userRepository.UserExists(form.Username))
-                return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
+                if (!await _userRepository.UserExists(form.Username))
+                    return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
 
-            var user = await _userRepository.GetUser(form.Username);
+                var user = await _userRepository.GetUser(form.Username);
 
-            if (_authenticationUtilities.VerifyPasswordHash(form.Password, user.Password, user.Salt))
-                return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = _authenticationUtilities.GenerateToken(user), UserId = user.Id, Username = user.Username });
-            else
-                return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
+                if (_authenticationUtilities.VerifyPasswordHash(form.Password, user.Password, user.Salt))
+                {
+                    await _notificationRepository.GenerateAndSaveNotifications(user.Id);
+                    user.LastLogin = DateTime.Now;
+                    await _userRepository.UpdateUser(user);
+                    return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = _authenticationUtilities.GenerateToken(user), UserId = user.Id, Username = user.Username });
+                }
+                else
+                    return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+           
         }
     }
 }
