@@ -93,6 +93,22 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
+        [Route("ForHome/{userId:int?}")]
+        public async Task<ActionResult<HomeBooksResponse>> GetBooksForHome(int? userId = null)
+        {
+            try
+            {
+                var books = await _bookRepository.GetHomeBooks(userId);
+                return ReturnIfNotEmpty(books, "No Books found.", false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+        }
+
+        [HttpGet]
         [Authorize]
         [Route("GetRecommendationsByBookAndUser/{bookId}/{userId}")]
         public async Task<ActionResult<RelatedBookRecommendations>> GetByBookAndUser(int bookId, int userId)

@@ -31,6 +31,13 @@
         public IEnumerable<BookResponse> Books { get; set; } = new List<BookResponse>();
     }
 
+    public class HomeBooksResponse
+    {
+        public IEnumerable<BookResponse> Recommended { get; set; }
+        public IEnumerable<BookResponse> New { get; set; }
+        public IEnumerable<BookResponse> Hot { get; set; }
+    }
+
     public class BookResponse
     {
         public int Id { get; set; }
