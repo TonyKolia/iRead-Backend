@@ -98,8 +98,12 @@ namespace iRead.API.Utilities
             var trainingData = _db.GetRecommenderTrainingData().AsEnumerable().TransformToTrainingData();
             _recommender.SetTrainingData(trainingData);
             _recommender.TrainModel();
+
+
+            var evaluationData = _db.GetRecommenderTrainingData().ToList();
+            var realUsers = _db.Users.Where(x => !x.Username.StartsWith("user")).Select(x => x.Id).ToList();
+            evaluationData = evaluationData.Where(x => realUsers.Contains(x.UserId)).ToList();
+            _recommender.EvaluateModel(evaluationData.TransformToTrainingData());
         }
-
-
     }
 }

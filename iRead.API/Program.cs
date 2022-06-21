@@ -11,7 +11,7 @@ using iRead.RecommendationSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builderCORS => builderCORS.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000")));
+builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builderCORS => builderCORS.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000", "http://192.168.2.2:3000")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
