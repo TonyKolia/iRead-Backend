@@ -67,5 +67,26 @@ namespace iRead.API.Repositories
         {
             return await _db.Users.Where(x => x.Categories.Any(c => c.Id == categoryId)).ToListAsync();
         }
+
+        public async Task<bool> UserActive(int id)
+        {
+            return (await _db.Users.FirstOrDefaultAsync(x => x.Id == id)).Active == 1;
+        }
+
+        public async Task<bool> ActivateAccount(int id, string token)
+        {
+            if (!_db.Users.Any(x => x.Id == id && x.ActivationGuid == token))
+                return false;
+
+            var user = await GetUser(id);
+            if (user == null)
+                return false;
+
+            user.Active = 1;
+            _db.Entry(user).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

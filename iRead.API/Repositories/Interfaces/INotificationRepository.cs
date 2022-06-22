@@ -9,6 +9,7 @@
         public Task<int> GetNumberOfUnreadNotifications(int userId);
         public Task<UserNotification> CreateNotification(UserNotification notification);
         public Task<IEnumerable<UserNotification>> CreateUserNotifications(IEnumerable<UserNotification> notifications);
-        public Task<UserNotification> UpdateNotification(UserNotification notification); 
+        public Task<UserNotification> UpdateNotification(UserNotification notification);
+        public Task GenerateAndCreateAccountActivationNotification(int userId);
     }
 }

@@ -7,5 +7,6 @@ namespace iRead.DBModels.Models
     {
         public int Id { get; set; }
         public string NotificationText1 { get; set; } = null!;
+        public string? Type { get; set; }
     }
 }

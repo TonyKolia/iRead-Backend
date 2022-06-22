@@ -30,6 +30,7 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IEmailTextRepository, EmailTextRepository>();
 
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();
 builder.Services.AddScoped<IAuthenticationUtilities, AuthenticationUtilities>();

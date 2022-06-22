@@ -4,7 +4,6 @@ namespace iRead.API.Utilities.Interfaces
 {
     public interface IEmailUtilities
     {
-        public Task SendEmail(EmailData email);
-        public Task<EmailData> GenerateOrderConfirmationEmail(int userId, int orderId);
+        public Task SendEmail(EmailType emailType, int userId, int? orderId = null);
     }
 }

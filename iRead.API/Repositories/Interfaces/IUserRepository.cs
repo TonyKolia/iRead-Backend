@@ -8,6 +8,8 @@
         Task<User> UpdateUser(User user);
         Task<bool> UserExists(int id);
         Task<bool> UserExists(string username);
+        Task<bool> UserActive(int id);
+        Task<bool> ActivateAccount(int id, string token);
         Task<IEnumerable<int>> GetFavoriteCategories(int id);
         Task<IEnumerable<int>> GetFavoriteAuthors(int id);
         Task<IEnumerable<User>> GetUsersByFavoriteCategory(int categoryId);

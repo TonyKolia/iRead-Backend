@@ -2,6 +2,7 @@
 using iRead.API.Models.Email;
 using iRead.API.Models.Order;
 using iRead.API.Repositories.Interfaces;
+using iRead.API.Utilities;
 using iRead.API.Utilities.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -28,28 +29,6 @@ namespace iRead.API.Controllers
         }
 
         [HttpPost]
-        [Route("TestEmail")]
-        public async Task<ActionResult> TestEmail()
-        {
-            try
-            {
-                var emailData = new EmailData();
-                emailData.AddressTo = "tonykolia@gmail.com";
-                emailData.Subject = "Test subject";
-                emailData.Body = "Test body";
-
-                await _emailUtilities.SendEmail(emailData);
-
-                return Ok();
-
-            }
-            catch(Exception ex)
-            {
-                return Ok("Aaaa");
-            }
-        }
-
-        [HttpPost]
         public async Task<ActionResult<string>> Create([FromBody] NewOrder order)
         {
             try
@@ -60,7 +39,7 @@ namespace iRead.API.Controllers
 
                 var createdOrderId = await _orderRepository.CreateOrder(order);
                 await UpdateFavorites(order.UserId, order.Books);
-                await _emailUtilities.SendEmail(await _emailUtilities.GenerateOrderConfirmationEmail(order.UserId, int.Parse(createdOrderId)));
+                await _emailUtilities.SendEmail(EmailType.OrderConfirmation, order.UserId, int.Parse(createdOrderId));
                 return ReturnResponse(ResponseType.Created, "Created successfully", new { OrderId = createdOrderId });
             }
             catch(Exception ex)

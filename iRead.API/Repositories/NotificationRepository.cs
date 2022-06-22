@@ -86,7 +86,7 @@ namespace iRead.API.Repositories
                 var randomUnreadFavorites = userFavoriteBooks.Where(x => x.BookRead == false && x.Book.Stock > 0).Take(3);
                 foreach(var randomUnreadFavorite in randomUnreadFavorites)
                 {
-                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Id == (int)NotificationType.FavoriteAvailable).NotificationText1, randomUnreadFavorite.Book.Title);
+                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Type == "FavoriteAvailable").NotificationText1, randomUnreadFavorite.Book.Title);
                     notifications.Add(SetupNewNotification(userId, notificationText));
                 }
             }
@@ -101,7 +101,7 @@ namespace iRead.API.Repositories
                 //addition in favorite category
                 foreach (var book in newBooksByCategories)
                 {
-                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Id == (int)NotificationType.AdditionInFavoriteCategory).NotificationText1, book.Categories.FirstOrDefault().Description, book.Title);
+                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Type == "AdditionInFavoriteCategory").NotificationText1, book.Categories.FirstOrDefault().Description, book.Title);
                     notifications.Add(SetupNewNotification(userId, notificationText));
                 }
 
@@ -109,7 +109,7 @@ namespace iRead.API.Repositories
                 //addition in favorite author
                 foreach (var book in newBooksByAuthors)
                 {
-                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Id == (int)NotificationType.AdditionInFavoriteAuthor).NotificationText1, book.Authors.FirstOrDefault().Name, book.Title);
+                    var notificationText = string.Format(notificationTexts.FirstOrDefault(x => x.Type == "AdditionInFavoriteAuthor").NotificationText1, book.Authors.FirstOrDefault().Name, book.Title);
                     notifications.Add(SetupNewNotification(userId, notificationText));
                 }
             }
@@ -121,7 +121,7 @@ namespace iRead.API.Repositories
                 var expiringOrders = userActiveOrders.Where(x => (x.ReturnDate - DateTime.Now).TotalDays <= 3 && (x.ReturnDate - DateTime.Now).TotalDays > 0);
                 foreach(var expiringOrder in expiringOrders)
                 {
-                    var text = notificationTexts.FirstOrDefault(x => x.Id == (int)NotificationType.OrderAboutToExpire).NotificationText1;
+                    var text = notificationTexts.FirstOrDefault(x => x.Type == "OrderAboutToExpire").NotificationText1;
                     var expireDays = Math.Round((expiringOrder.ReturnDate - DateTime.Now).TotalDays, 0);
                     var expireHours = Math.Round((expiringOrder.ReturnDate - DateTime.Now).TotalHours, 0);
 
@@ -138,7 +138,7 @@ namespace iRead.API.Repositories
                  var expiredOrders = userActiveOrders.Where(x => (x.ReturnDate - DateTime.Now).TotalDays < 0);
                 foreach(var expiredOrder in expiredOrders)
                 {
-                    var text = notificationTexts.FirstOrDefault(x => x.Id == (int)NotificationType.OrderExpired).NotificationText1;
+                    var text = notificationTexts.FirstOrDefault(x => x.Type == "OrderExpired").NotificationText1;
                     var expireDays = Math.Abs((expiredOrder.ReturnDate - DateTime.Now).TotalDays);
                     if (expireDays < 1)
                         expireDays = 1;
@@ -165,6 +165,16 @@ namespace iRead.API.Repositories
                 NotificationText = text,
                 Viewed = 0
             };
+        }
+
+        public async Task GenerateAndCreateAccountActivationNotification(int userId)
+        {
+            if (!await _userRepository.UserActive(userId))
+            {
+                var notificationText = _db.NotificationTexts.Where(x => x.Type == "AccountActivationPending").Select(x => x.NotificationText1).FirstOrDefault();
+                var notification = SetupNewNotification(userId, notificationText);
+                await CreateNotification(notification);
+            }
         }
     }
 

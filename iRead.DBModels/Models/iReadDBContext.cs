@@ -21,6 +21,7 @@ namespace iRead.DBModels.Models
         public virtual DbSet<Book> Books { get; set; } = null!;
         public virtual DbSet<BooksStock> BooksStocks { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<EmailText> EmailTexts { get; set; } = null!;
         public virtual DbSet<Favorite> Favorites { get; set; } = null!;
         public virtual DbSet<Gender> Genders { get; set; } = null!;
         public virtual DbSet<IdentificationMethod> IdentificationMethods { get; set; } = null!;
@@ -363,7 +364,6 @@ namespace iRead.DBModels.Models
                     .HasForeignKey(d => d.UserId)
                     .HasConstraintName("FK__UserNotif__UserI__1B9317B3");
             });
-
 
             modelBuilder.Entity<RecommenderTrainingData>(entity =>
             {

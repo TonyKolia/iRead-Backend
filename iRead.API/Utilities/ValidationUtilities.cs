@@ -129,7 +129,10 @@ namespace iRead.API.Utilities
             if (!await _userRepository.UserExists(userId))
                 res.Errors.Add("user", "Ο χρήστης δεν υπάρχει.");
 
-            if(orderItems.Count() == 0)
+            if(!await _userRepository.UserActive(userId))
+                res.Errors.Add("userNotActive", "Ο λογαριασμός σας δεν έχει ενεργοποιηθεί.");
+
+            if (orderItems.Count() == 0)
                 res.Errors.Add("noItems", "Δεν προστέθηκαν βιβλία στην παραγγελία.");
 
             if(res.Errors.Count() > 0)

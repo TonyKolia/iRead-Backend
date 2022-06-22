@@ -23,6 +23,7 @@ namespace iRead.DBModels.Models
         public int? UserCategory { get; set; }
         public int Active { get; set; }
         public string? Salt { get; set; }
+        public string? ActivationGuid { get; set; }
 
         public virtual UserCategory? UserCategoryNavigation { get; set; }
         public virtual MemberContactInfo MemberContactInfo { get; set; } = null!;

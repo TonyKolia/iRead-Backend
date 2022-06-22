@@ -2,6 +2,7 @@
 using iRead.API.Models.Account;
 using iRead.API.Repositories;
 using iRead.API.Repositories.Interfaces;
+using iRead.API.Utilities;
 using iRead.API.Utilities.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +20,10 @@ namespace iRead.API.Controllers
         private readonly IAuthorRepository _authorRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IEmailUtilities _emailUtilities;
 
 
-        public AccountController(INotificationRepository _notificationRepository, IAuthorRepository _authorRepository, ICategoryRepository _categoryRepository, IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
+        public AccountController(IEmailUtilities _emailUtilities, INotificationRepository _notificationRepository, IAuthorRepository _authorRepository, ICategoryRepository _categoryRepository, IMemberRepository _memberRepository, IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger):base(logger)
         {
             this._validationUtilities = _validationUtilities;
             this._userRepository = _userRepository;
@@ -30,6 +32,7 @@ namespace iRead.API.Controllers
             this._authorRepository = _authorRepository;
             this._categoryRepository = _categoryRepository;
             this._notificationRepository = _notificationRepository;
+            this._emailUtilities = _emailUtilities;
         }
 
         [HttpPost]
@@ -52,7 +55,7 @@ namespace iRead.API.Controllers
                     RegisterDate = DateTime.Now,
                     LastLogin = DateTime.Now,
                     UserCategory = 1,
-                    Active = 1,
+                    Active = 0,
                     Authors = (await _authorRepository.GetMultipleAuthors(data.FavoriteAuthors)) as List<Author>,
                     Categories = (await _categoryRepository.GetMultipleCategories(data.FavoriteCategories)) as List<Category>
                 };
@@ -106,9 +109,16 @@ namespace iRead.API.Controllers
                 if (_authenticationUtilities.VerifyPasswordHash(form.Password, user.Password, user.Salt))
                 {
                     await _notificationRepository.GenerateAndSaveNotifications(user.Id);
+                    var token = _authenticationUtilities.GenerateToken(user);
+                    if (user.Active == 0)
+                    {
+                        await _emailUtilities.SendEmail(EmailType.AccountActivation, user.Id);
+                        await _notificationRepository.GenerateAndCreateAccountActivationNotification(user.Id);
+                    }
+                    user.ActivationGuid = token;
                     user.LastLogin = DateTime.Now;
                     await _userRepository.UpdateUser(user);
-                    return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = _authenticationUtilities.GenerateToken(user), UserId = user.Id, Username = user.Username });
+                    return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = token, UserId = user.Id, Username = user.Username });
                 }
                 else
                     return ReturnResponse(ResponseType.BadRequest, "Λανθασμένος συνδυασμός στοιχείων σύνδεσης.");
@@ -119,6 +129,22 @@ namespace iRead.API.Controllers
                 return ReturnResponse(ResponseType.Error);
             }
            
+        }
+
+        [HttpPost]
+        [Route("ActivateAccount/{userId}/{token}")]
+        public async Task<ActionResult<bool>> ActivateAccount(int userId, string token)
+        {
+            try
+            {
+                var accountActivated = await _userRepository.ActivateAccount(userId, token);
+                return ReturnResponse(ResponseType.Updated, "", accountActivated);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
         }
     }
 }

@@ -13,10 +13,12 @@ namespace iRead.API.Controllers
     public class RatingController : CustomControllerBase
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly IUserRepository _userRepository;
 
-        public RatingController(IRatingRepository _ratingRepository, ILogger<CustomControllerBase> logger) : base(logger)
+        public RatingController(IUserRepository _userRepository, IRatingRepository _ratingRepository, ILogger<CustomControllerBase> logger) : base(logger)
         {
             this._ratingRepository = _ratingRepository;
+            this._userRepository = _userRepository;
         }
         
         [HttpGet]
@@ -33,6 +35,9 @@ namespace iRead.API.Controllers
         {
             try
             {
+                if (!await _userRepository.UserActive(rating.UserId))
+                    return ReturnResponse(ResponseType.BadRequest, "Ο λογαριασμός σας δεν έχει ενεργοποιηθεί.");
+
                 var createdRating = await _ratingRepository.CreateRating(rating);
                 return ReturnResponse(ResponseType.Created, "", createdRating.MapResponse());
             }
