@@ -11,7 +11,7 @@ using iRead.RecommendationSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builderCORS => builderCORS.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000", "http://192.168.2.2:3000")));
+builder.Services.AddCors(options => options.AddPolicy("CORSPolicy", builderCORS => builderCORS.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000", "http://192.168.2.42:3000")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -34,6 +34,7 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IValidationUtilities, ValidationUtilities>();
 builder.Services.AddScoped<IAuthenticationUtilities, AuthenticationUtilities>();
 builder.Services.AddScoped<IRecommendationUtilities, RecommendationUtilities>();
+builder.Services.AddScoped<IEmailUtilities, EmailUtilities>();
 
 builder.Services.AddScoped<Recommender>();
 builder.Services.AddPredictionEnginePool<RecommendationInput, RecommendationOutput>().FromFile(builder.Configuration.GetSection("RecommendationModelPath").Value, true);

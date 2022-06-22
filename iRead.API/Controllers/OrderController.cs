@@ -1,4 +1,5 @@
 ﻿using iRead.API.Models;
+using iRead.API.Models.Email;
 using iRead.API.Models.Order;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities.Interfaces;
@@ -16,12 +17,36 @@ namespace iRead.API.Controllers
         private readonly IOrderRepository _orderRepository;
         private readonly IFavoriteRepository _favoriteRepository;
         private readonly IValidationUtilities _validationUtilities;
+        private readonly IEmailUtilities _emailUtilities;
 
-        public OrderController(IOrderRepository _orderRepository, IFavoriteRepository _favoriteRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger) : base(logger)
+        public OrderController(IEmailUtilities _emailUtilities, IOrderRepository _orderRepository, IFavoriteRepository _favoriteRepository, IValidationUtilities _validationUtilities, ILogger<CustomControllerBase> logger) : base(logger)
         {
             this._orderRepository = _orderRepository;
             this._favoriteRepository = _favoriteRepository;
             this._validationUtilities = _validationUtilities;
+            this._emailUtilities = _emailUtilities;
+        }
+
+        [HttpPost]
+        [Route("TestEmail")]
+        public async Task<ActionResult> TestEmail()
+        {
+            try
+            {
+                var emailData = new EmailData();
+                emailData.AddressTo = "tonykolia@gmail.com";
+                emailData.Subject = "Test subject";
+                emailData.Body = "Test body";
+
+                await _emailUtilities.SendEmail(emailData);
+
+                return Ok();
+
+            }
+            catch(Exception ex)
+            {
+                return Ok("Aaaa");
+            }
         }
 
         [HttpPost]
@@ -35,6 +60,7 @@ namespace iRead.API.Controllers
 
                 var createdOrderId = await _orderRepository.CreateOrder(order);
                 await UpdateFavorites(order.UserId, order.Books);
+                await _emailUtilities.SendEmail(await _emailUtilities.GenerateOrderConfirmationEmail(order.UserId, int.Parse(createdOrderId)));
                 return ReturnResponse(ResponseType.Created, "Created successfully", new { OrderId = createdOrderId });
             }
             catch(Exception ex)
