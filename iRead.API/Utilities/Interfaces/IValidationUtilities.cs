@@ -9,5 +9,7 @@ namespace iRead.API.Utilities.Interfaces
         IEnumerable<string> FindEmptyObjectFields(object obj);
         Task<ValidationResult> ValidateRegistrationForm(RegistrationForm form);
         Task<ValidationResult> ValidateOrder(IEnumerable<int> orderItems, int userId);
+        Task<ValidationResult> ValidateEmail(string email);
+        Task<ValidationResult> ValidatePasswordChange(int userId, string password, string confirmPassword);
     }
 }

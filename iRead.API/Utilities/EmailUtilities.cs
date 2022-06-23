@@ -82,8 +82,8 @@ namespace iRead.API.Utilities
                 return;
 
             var memberData = await _memberRepository.GetMemberFullInfo(userId);
-
-            var activationLink = string.Format("http://192.168.2.42:3000/AccountActivation/userId/{0}/token/{1}", user.Id, user.ActivationGuid);
+            var clientUrl = _config.GetValue<string>("ClientUrl");
+            var activationLink = string.Format(clientUrl+"/AccountActivation/userId/{0}/token/{1}", user.Id, user.ActivationGuid);
 
             var emailData = new EmailData
             {
@@ -95,15 +95,42 @@ namespace iRead.API.Utilities
             await SendEmail(emailData);
         }
 
-        public async Task SendEmail(EmailType emailType, int userId, int? orderId = null)
+        private async Task GenerateAndSendPasswordResetEmail(string email)
+        {
+            var emailText = await _emailTextRepository.GetEmailText("PasswordReset");
+            if (emailText == null)
+                return;
+
+            var user = await _memberRepository.GetMemberContactInfo(email);
+            if (user == null)
+                return;
+
+            var token = (await _userRepository.GetUser(user.UserId)).ActivationGuid;
+            var clientUrl = _config.GetValue<string>("ClientUrl");
+            var activationLink = string.Format(clientUrl+"/passwordReset/userId/{0}/token/{1}", user.UserId, token);
+
+            var emailData = new EmailData
+            {
+                AddressTo = email,
+                Subject = string.Format(emailText.Subject),
+                Body = string.Format(emailText.Body, activationLink)
+            };
+
+            await SendEmail(emailData);
+        }
+
+        public async Task SendEmail(EmailType emailType, int? userId = null, int? orderId = null, string email = null)
         {
             switch (emailType) 
             {
                 case EmailType.OrderConfirmation:
-                    await GenerateAndSendOrderConfirmationEmail(userId, orderId.Value);
+                    await GenerateAndSendOrderConfirmationEmail(userId.Value, orderId.Value);
                     break;
                 case EmailType.AccountActivation:
-                    await GenerateAndSendAccountActivationEmail(userId);
+                    await GenerateAndSendAccountActivationEmail(userId.Value);
+                    break;
+                case EmailType.PasswordReset:
+                    await GenerateAndSendPasswordResetEmail(email);
                     break;
                 default:
                     break;

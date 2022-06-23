@@ -41,9 +41,9 @@ namespace iRead.API.Repositories
                 return null;
         }
 
-        public async Task<bool> IdNumberExists(string idNumber)
+        public async Task<bool> IdNumberExists(string idNumber, int identificationType)
         {
-            return await _db.MemberPersonalInfos.AnyAsync(x => x.IdNumber == idNumber);
+            return await _db.MemberPersonalInfos.AnyAsync(x => x.IdNumber == idNumber && x.IdType == identificationType);
         }
 
         #endregion
@@ -53,6 +53,11 @@ namespace iRead.API.Repositories
         public async Task<MemberContactInfo> GetMemberContactInfo(int id)
         {
             return await _db.MemberContactInfos.FirstOrDefaultAsync(x => x.UserId == id);
+        }
+
+        public async Task<MemberContactInfo> GetMemberContactInfo(string email)
+        {
+            return await _db.MemberContactInfos.FirstOrDefaultAsync(x => x.Email == email);
         }
 
         public async Task<MemberContactInfo> CreateMemberContactInfo(MemberContactInfo contactInfo)
@@ -109,5 +114,7 @@ namespace iRead.API.Repositories
 
             return userData;
         }
+
+       
     }
 }

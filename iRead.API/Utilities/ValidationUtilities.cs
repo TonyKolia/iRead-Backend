@@ -10,12 +10,14 @@ namespace iRead.API.Utilities
         private readonly IUserRepository _userRepository;
         private readonly IMemberRepository _memberRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IAuthenticationUtilities _authenticationUtilities;
 
-        public ValidationUtilities(IUserRepository _userRepository, IMemberRepository _memberRepository, IBookRepository _bookRepository)
+        public ValidationUtilities(IAuthenticationUtilities _authenticationUtilities, IUserRepository _userRepository, IMemberRepository _memberRepository, IBookRepository _bookRepository)
         {
             this._userRepository = _userRepository;
             this._memberRepository = _memberRepository;
             this._bookRepository = _bookRepository;
+            this._authenticationUtilities = _authenticationUtilities;
         }
 
         public bool IsObjectCompletelyPopulated(object obj)
@@ -67,7 +69,7 @@ namespace iRead.API.Utilities
             else if(DateTime.Now.Year - form.Birthdate.Value.Year < 12)
                 res.Errors.Add("birthdate", "Η εγγραφή επιτρέπεται σε άτομα άνω των 12 ετών.");
 
-            if(await _memberRepository.IdNumberExists(form.IdNumber))
+            if(await _memberRepository.IdNumberExists(form.IdNumber, form.IdType.Value))
                 res.Errors.Add("idNumber", "Ο αριθμός εγγράφου ταυτοποίησης χρησιμοποιείται ήδη.");
 
             if(form.PostalCode.Length != 5)
@@ -78,6 +80,8 @@ namespace iRead.API.Utilities
 
             if(!IsEmailValid(form.Email))
                 res.Errors.Add("email", "Μη έγκυρη διεύθυνση email.");
+            else if(await _userRepository.UserEmailExists(form.Email))
+                res.Errors.Add("email", "Η διέυθυνση email δεν είναι διαθέσιμη.");
 
             if (form.FavoriteCategories.Count() == 0)
                 res.Errors.Add("favoriteCategories", "Παρακαλώ επιλέξτε τουλάχιστον μία κατηγορία προτίμησης.");
@@ -98,6 +102,18 @@ namespace iRead.API.Utilities
                 return res;
             }
 
+            return res;
+        }
+
+        public async Task<ValidationResult> ValidateEmail(string email)
+        {
+            var valid = IsEmailValid(email);
+            var res = new ValidationResult();
+            if (valid)
+                return res;
+
+            res.Errors.Add("invalidEmailForma","Μη έγκυρη διέυθυνση email.");
+            res.Success = false;
             return res;
         }
 
@@ -165,6 +181,27 @@ namespace iRead.API.Utilities
             {
                 res.Success = false;
                 res.ValidationFailType = ValidationFailType.WrongData;
+            }
+
+            return res;
+        }
+
+        public async Task<ValidationResult> ValidatePasswordChange(int userId, string password, string confirmPassword)
+        {
+            var res = new ValidationResult();
+            var user = await _userRepository.GetUser(userId);
+            if(user == null)
+            {
+                res.Errors.Add("userNotFound", "Ο χρήστης δεν βρέθηκε.");
+                res.Success = false;
+                return res;
+            }
+
+            if(password != confirmPassword)
+            {
+                res.Errors.Add("notMatching", "Οι κωδικοί πρόσβασης δεν ταιριάζουν.");
+                res.Success = false;
+                return res;
             }
 
             return res;

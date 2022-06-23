@@ -146,5 +146,51 @@ namespace iRead.API.Controllers
                 return ReturnResponse(ResponseType.Error);
             }
         }
+
+        [HttpPost]
+        [Route("SendPasswordResetEmail/{email}")]
+        public async Task<ActionResult> SendPasswordResetEmail(string email)
+        {
+            try
+            {
+                var validationResult = await _validationUtilities.ValidateEmail(email);
+                if(!validationResult.Success)
+                    return ReturnResponse(ResponseType.BadRequest, "Errors occured during validation", validationResult);
+
+                await _emailUtilities.SendEmail(EmailType.PasswordReset, email: email);
+                return ReturnResponse(ResponseType.Created, "Email sent");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+        }
+
+        [HttpPost]
+        [Route("ResetPassword/{userId}/{token}")]
+        public async Task<ActionResult> ResetPassword([FromBody] PasswordResetForm passwordResetForm, int userId, string token)
+        {
+            try
+            {
+                var user = await _userRepository.GetUser(userId);
+                if (user.ActivationGuid != token)
+                    return ReturnResponse(ResponseType.BadRequest, "Errors occured during validation", "Η επαναφορά του κωδικού πρόσβασης απέτυχε. Παρακαλούμε δοκιμάστε ξανά.");
+
+                var validationResult = await _validationUtilities.ValidatePasswordChange(userId, passwordResetForm.Password, passwordResetForm.ConfirmPassword);
+                if(!validationResult.Success)
+                    return ReturnResponse(ResponseType.BadRequest, "Errors occured during validation", validationResult);
+
+                user.Password = _authenticationUtilities.HashPassword(passwordResetForm.Password, out var salt);
+                user.Salt = salt;
+                await _userRepository.UpdateUser(user);
+                return ReturnResponse(ResponseType.Updated, "Password reset successfully");
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ReturnResponse(ResponseType.Error);
+            }
+        }
     }
 }

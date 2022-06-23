@@ -88,5 +88,10 @@ namespace iRead.API.Repositories
 
             return true;
         }
+
+        public async Task<bool> UserEmailExists(string email)
+        {
+            return await _db.MemberContactInfos.AnyAsync(x => x.Email == email);
+        }
     }
 }
