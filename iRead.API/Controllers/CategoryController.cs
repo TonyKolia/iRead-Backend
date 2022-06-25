@@ -25,9 +25,10 @@ namespace iRead.API.Controllers
         }
 
         [HttpGet]
+        [Route("GetTest")]
         public async Task<ActionResult<IEnumerable<Category>>> GetTest()
         {
-            return Ok("TEST COMPLETED")l
+            return Ok("TEST COMPLETED");
         }
 
         [HttpGet]
