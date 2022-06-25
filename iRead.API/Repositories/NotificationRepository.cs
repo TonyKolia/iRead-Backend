@@ -176,6 +176,13 @@ namespace iRead.API.Repositories
                 await CreateNotification(notification);
             }
         }
+
+        public async Task GenerateAndCreateWelcomeNotification(int userId)
+        {
+            var notificationText = _db.NotificationTexts.Where(x => x.Type == "Welcome").Select(x => x.NotificationText1).FirstOrDefault();
+            var notification = SetupNewNotification(userId, notificationText);
+            await CreateNotification(notification);
+        }
     }
 
     internal enum NotificationType

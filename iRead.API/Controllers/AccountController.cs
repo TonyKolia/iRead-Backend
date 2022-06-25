@@ -82,6 +82,7 @@ namespace iRead.API.Controllers
                 };
 
                 await _userRepository.UpdateUser(accountData);
+                await _notificationRepository.GenerateAndCreateWelcomeNotification(createdUser.Id);
 
                 return ReturnResponse(ResponseType.Created, "", await _memberRepository.GetMemberFullInfo(createdUser.Id));
             }
@@ -110,14 +111,14 @@ namespace iRead.API.Controllers
                 {
                     await _notificationRepository.GenerateAndSaveNotifications(user.Id);
                     var token = _authenticationUtilities.GenerateToken(user);
+                    user.ActivationGuid = token;
+                    user.LastLogin = DateTime.Now;
+                    await _userRepository.UpdateUser(user);
                     if (user.Active == 0)
                     {
                         await _emailUtilities.SendEmail(EmailType.AccountActivation, user.Id);
                         await _notificationRepository.GenerateAndCreateAccountActivationNotification(user.Id);
                     }
-                    user.ActivationGuid = token;
-                    user.LastLogin = DateTime.Now;
-                    await _userRepository.UpdateUser(user);
                     return ReturnResponse(ResponseType.Token, "", new LoginResponse { Token = token, UserId = user.Id, Username = user.Username });
                 }
                 else
