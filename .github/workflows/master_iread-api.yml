@@ -21,6 +21,19 @@ jobs:
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
+          
+      - name: App Settings Variable Substitution
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: '**/appsettings.json'
+        env:
+          ConnectionStrings.iReadDBConnection: ${{ secrets.CONNECTION_STRING }}
+          ImagePaths.Books: ${{ secrets.BOOK_IMAGES_PATH }}
+          RecommendationModelPath: ${{ secrets.TRAINED_MODEL_PATH }}
+          AppSettings.Token: ${{ secrets.TOKEN }}
+          EmailSettings.AddressFrom: ${{ secrets.EMAIL_ADDRESS_FROM }}
+          EmailSettings.Password: ${{ secrets.EMAIL_PASSWORD }}
+          ClientUrl: ${{ secrets.CLIENT_URL }}
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
