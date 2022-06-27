@@ -118,7 +118,7 @@ namespace iRead.API.Utilities
         //4. The rest of the books
         public static List<BookResponse> OrderFoundBooksBasedOnRecommendations(this List<BookResponse> books, IEnumerable<RecommendedBook> recommendedBooks, IEnumerable<int> favoriteCategories, IEnumerable<int> favoriteAuthors, bool fromSearch = false)
         {
-            if (recommendedBooks.Count() == 0 || books.Count == 0)
+            if (books.Count == 0)
                 return books;
 
             //this list contains the 4 above mentions ranking "partitions"
