@@ -33,6 +33,7 @@ jobs:
           AppSettings.Token: ${{ secrets.TOKEN }}
           EmailSettings.AddressFrom: ${{ secrets.EMAIL_ADDRESS_FROM }}
           EmailSettings.Password: ${{ secrets.EMAIL_PASSWORD }}
+          ClientUrl: ${{ secrets.CLIENT_URL }}
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
