@@ -2,6 +2,7 @@
 using iRead.API.Models.Validation;
 using iRead.API.Repositories.Interfaces;
 using iRead.API.Utilities.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace iRead.API.Utilities
 {
@@ -46,6 +47,43 @@ namespace iRead.API.Utilities
             return emptyFields;
         }
 
+        private async Task<bool> IsPasswordValid(string password)
+        {
+            if (password.Length < 8)
+                return false;
+
+            //has upper
+            var hasUpper = new Regex(@"[A-Z]+");
+            if(!hasUpper.IsMatch(password))
+                return false;
+
+            //has lower
+            var hasLower = new Regex(@"[a-z]+");
+            if (!hasLower.IsMatch(password))
+                return false;
+
+            //has number
+            var hasNumber = new Regex(@"[0-9]+");
+            if (!hasNumber.IsMatch(password))
+                return false;
+
+            //special characters
+            var hasSpecial = new Regex(@"[!@#$%^&*()_+={};:<>|./?,[\]-]+");
+            if (!hasSpecial.IsMatch(password))
+                return false;
+
+            return true;
+        }
+
+        private async Task<bool> IsUsernameValid(string username)
+        {
+            var hasLetters = new Regex(@"^[a-zA-Z][\w]+$");
+            if (!hasLetters.IsMatch(username))
+                return false;
+
+            return true;
+        }
+
         public async Task<ValidationResult> ValidateRegistrationForm(RegistrationForm form)
         {
             var res = new ValidationResult();
@@ -58,10 +96,16 @@ namespace iRead.API.Utilities
                 return res;
             }
 
+            if(!await IsUsernameValid(form.Username))
+                res.Errors.Add("username", "Το όνομα χρήστη πρέπει να έχει μήκος τουλάχιστον 4 χαρακτήρες και μπορεί να περιέχει λατινικούς χαρακτήρες, κάτω παύλα ή νούμερα ξεκινόντας με χαρακτήρα.");
+
             if (await _userRepository.UserExists(form.Username))
                 res.Errors.Add("username", "Το όνομα χρήστη υπάρχει ήδη.");
 
-            if(form.Password != form.ConfirmPassword)
+            if(!await IsPasswordValid(form.Password))
+                res.Errors.Add("password", "Ο κωδικός πρόσβασης πρέπει να έχει μήκος τουλάχιστον 8 χαρακτήρες, να περιέχει λατινικούς χαρακτήρες καθώς και τουλάχιστον έναν πεζό, κεφαλαίο, αριθμητικό και ειδικό χαρακτήρα.");
+
+            if (form.Password != form.ConfirmPassword)
                 res.Errors.Add("confirmPassword", "Οι κωδικοί πρόσβασης δεν ταιριάζουν.");
 
             if(form.Birthdate.Value.Year > DateTime.Now.Year || form.Birthdate.Value.Year < DateTime.Now.Year - 100)
@@ -75,13 +119,13 @@ namespace iRead.API.Utilities
             if(form.PostalCode.Length != 5)
                 res.Errors.Add("postalCode", "Μη έγκυρος ταχυδρομικός κώδικας.");
 
-            if(form.Telephone.Length < 10)
+            if(form.Telephone.Length != 10)
                 res.Errors.Add("telephone", "Μη έγκυρος αριθμός τηλεφώνου.");
 
             if(!IsEmailValid(form.Email))
                 res.Errors.Add("email", "Μη έγκυρη διεύθυνση email.");
             else if(await _userRepository.UserEmailExists(form.Email))
-                res.Errors.Add("email", "Η διέυθυνση email δεν είναι διαθέσιμη.");
+                res.Errors.Add("email", "Η διεύθυνση email δεν είναι διαθέσιμη.");
 
             if (form.FavoriteCategories.Count() == 0)
                 res.Errors.Add("favoriteCategories", "Παρακαλώ επιλέξτε τουλάχιστον μία κατηγορία προτίμησης.");
