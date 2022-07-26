@@ -38,12 +38,12 @@ namespace iRead.RecommendationSystem
 
         public void TrainModel()
         {
-            //var splitData = _context.Data.TrainTestSplit(_trainingData, testFraction: 0.2);
+            var splitData = _context.Data.TrainTestSplit(_trainingData, testFraction: 0.2);
             var trainer = _context.Recommendation().Trainers.MatrixFactorization(SetupTrainer());
             _model = trainer.Fit(_trainingData);
-            //var evaluationPredictions = _model.Transform(splitData.TestSet);
-            //var metrics = _context.Regression.Evaluate(evaluationPredictions, labelColumnName: nameof(TrainingInput.Rating));
-            //System.Diagnostics.Debug.WriteLine($"RSquared: {metrics.RSquared:F2} - {metrics.RootMeanSquaredError}");
+            var evaluationPredictions = _model.Transform(splitData.TestSet);
+            var metrics = _context.Regression.Evaluate(evaluationPredictions, labelColumnName: nameof(TrainingInput.Rating));
+            System.Diagnostics.Debug.WriteLine($"RSquared: {metrics.RSquared:F2} - {metrics.RootMeanSquaredError}");
             _context.Model.Save(_model, _trainingData.Schema, _modelFilePath);
         }
 

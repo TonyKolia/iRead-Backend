@@ -264,7 +264,7 @@ namespace iRead.API.Repositories
                     break;
             }
 
-            return books.Take(pageSize);
+            return books;
         }
 
         private async Task<IQueryable<Book>> SetupMainBooksQuery(IEnumerable<int>? authors, IEnumerable<int>? publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems, string type, int? userId)
@@ -324,51 +324,8 @@ namespace iRead.API.Repositories
 
         public async Task<IEnumerable<BookResponse>> GetBooksByFilters(IEnumerable<int>? authors, IEnumerable<int>? publishers, int? minYear, int? maxYear, int? categoryId, IEnumerable<string> searchItems, string type, int? userId)
         {
-            //var forHome = type.Contains("-home");
-            //var sortType = type.Split('-')[0];
-
-            //var books = forHome ? await SetupHomeBooksQuery(userId, sortType) : await SetupMainBooksQuery(authors, publishers, minYear, maxYear, categoryId, searchItems, type, userId);
             var books = await GetBookResults(await SetupMainBooksQuery(authors, publishers, minYear, maxYear, categoryId, searchItems, type, userId));
-            //var foundBooks = await books.Select(x =>  new BookResponse
-            //{
-            //    Id = x.Id,
-            //    Title = x.Title,
-            //    ISBN = x.Isbn,
-            //    PageCount = x.PageCount,
-            //    Description = x.Description,
-            //    ImagePath = x.ImagePath ?? "",
-            //    PublishDate = x.PublishDate.Value,
-            //    Stock = x.BooksStock.Stock,
-            //    Authors = x.Authors.Select(a => new AuthorResponse
-            //    {
-            //        Id = a.Id,
-            //        Name = a.Name,
-            //        Surname = a.Surname,
-            //        Birthdate = a.Birthdate
-            //    }),
-            //    Categories = x.Categories.Select(c => new CategoryResponse
-            //    {
-            //        Id = c.Id,
-            //        Description = c.Description ?? ""
-            //    }),
-            //    Ratings = x.Ratings.Select(r => new RatingResponse
-            //    {
-            //        Username = r.User.Username,
-            //        Rating = r.Rating1,
-            //        Comment = r.Comment ?? "",
-            //        DateAdded = r.DateAdded
-            //    }),
-            //    Publishers = x.Publishers.Select(p => new PublisherResponse
-            //    {
-            //        Id = p.Id,
-            //        Name = p.Name,
-            //        Description = p.Description ?? ""
-            //    })
-            
-            //}).ToListAsync();
-
-            //if (!forHome)
-                books = books.ToList().OrderFoundBooks(searchItems);
+            books = books.ToList().OrderFoundBooks(searchItems);
 
             if (type == "recommended" || type == "")
                 books = await OrderMainRecommendedBooks(books.ToList(), userId, searchItems.Count() > 0);
@@ -378,11 +335,17 @@ namespace iRead.API.Repositories
 
         public async Task<HomeBooksResponse> GetHomeBooks(int? userId)
         {
+            var pageSize = 6;
+            var recommended = new List<RecommendedBook>();
+            if (userId.HasValue)
+                recommended = (await _recommendationUtilities.GetRecommendedBooks(userId.Value)).ToList();
+
+            var recommendedBookItems = (await GetBookResults(await SetupHomeBooksQuery(userId, "recommended", pageSize))).Select(x => new { Book = x, Rating = recommended.FirstOrDefault(xx => xx.BookId == x.Id)?.PredictedRating }).OrderByDescending(x => x.Rating).Select(x => x.Book);
             return new HomeBooksResponse
             {
-                Recommended = await GetBookResults(await SetupHomeBooksQuery(userId, "recommended", 6)),
-                New = await GetBookResults(await SetupHomeBooksQuery(userId, "new", 6)),
-                Hot = await GetBookResults(await SetupHomeBooksQuery(userId, "hot", 6))
+                Recommended = recommendedBookItems.Take(pageSize),
+                New = (await GetBookResults(await SetupHomeBooksQuery(userId, "new", pageSize))).Take(pageSize),
+                Hot = (await GetBookResults(await SetupHomeBooksQuery(userId, "hot", pageSize))).Take(pageSize)
             };
         }
 
@@ -617,7 +580,8 @@ namespace iRead.API.Repositories
         {
             var pageSize = 4;
             var idsToExclude = new List<int>();
-            var userRecommendations = await GetBookResults(await SetupHomeBooksQuery(userId, "recommended", pageSize, new List<int> { bookId }));
+            var recommended = (await _recommendationUtilities.GetRecommendedBooks(userId)).ToList();
+            var userRecommendations = (await GetBookResults(await SetupHomeBooksQuery(userId, "recommended", pageSize, new List<int> { bookId }))).Select(x => new { Book = x, Rating = recommended.FirstOrDefault(xx => xx.BookId == x.Id)?.PredictedRating }).OrderByDescending(x => x.Rating).Select(x => x.Book).Take(pageSize);
             idsToExclude.AddRange(userRecommendations.Select(x => x.Id));
             var otherUsersRecommendations = await GetOtherUserRecommendations(bookId, pageSize, userId, idsToExclude);
             idsToExclude.AddRange(otherUsersRecommendations.Select(x => x.Id));

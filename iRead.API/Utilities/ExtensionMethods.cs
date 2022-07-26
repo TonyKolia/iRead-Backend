@@ -125,7 +125,8 @@ namespace iRead.API.Utilities
             var booksParts = new List<IEnumerable<BookResponse>>();
 
             //partition 1. Books recommended from the recommendation engine
-            booksParts.Add(books.Where(x => recommendedBooks.Select(r => r.BookId).Contains(x.Id)));
+            var bookItems = books.Where(x => recommendedBooks.Select(r => r.BookId).Contains(x.Id)).Select(x => new { Book = x, Rating = recommendedBooks.FirstOrDefault(xx => xx.BookId == x.Id).PredictedRating}).OrderByDescending(x => x.Rating).ToList();
+            booksParts.Add(bookItems.Select(x => x.Book));
 
             var booksNotInRecommended = books.Where(x => !recommendedBooks.Select(r => r.BookId).Contains(x.Id));
             var recommendedByCategory = new List<BookResponse>();
