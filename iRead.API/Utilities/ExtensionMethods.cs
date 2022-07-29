@@ -133,11 +133,12 @@ namespace iRead.API.Utilities
             var recommendedByCategoryAndAuthor = new List<BookResponse>();
             foreach (var favCategory in favoriteCategories)
             {
-                recommendedByCategory.AddRange(booksNotInRecommended.Where(x => x.Categories.Select(c => c.Id).Contains(favCategory)));
+                var booksInCategory = booksNotInRecommended.Where(x => x.Categories.Select(c => c.Id).Contains(favCategory));
+                recommendedByCategory.AddRange(booksInCategory);
                 foreach (var favAuthor in favoriteAuthors)
                 {
                     //Partition 2. Books written by a favorite author in a favorite category
-                    recommendedByCategoryAndAuthor.AddRange(recommendedByCategory.Where(x => x.Authors.Select(a => a.Id).Contains(favAuthor)));
+                    recommendedByCategoryAndAuthor.AddRange(booksInCategory.Where(x => x.Authors.Select(a => a.Id).Contains(favAuthor)));
                 }
             }
 
